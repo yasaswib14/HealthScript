@@ -16,3 +16,4 @@ public class Medication {
     private LocalDate startDate;
     private LocalDate endDate;
 }
+ 
