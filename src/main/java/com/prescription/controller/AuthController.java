@@ -22,9 +22,9 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     public AuthController(AuthenticationManager authenticationManager,
-                          JwtUtil jwtUtil,
-                          UserRepository userRepository,
-                          PasswordEncoder passwordEncoder) {
+            JwtUtil jwtUtil,
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
@@ -33,10 +33,10 @@ public class AuthController {
 
     // ---------------- Register ----------------
     @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword())); // encode password
+    public Map<String, String> register(@RequestBody User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        return "User registered successfully!";
+        return Map.of("message", "User registered successfully!");
     }
 
     // ---------------- Login ----------------
@@ -44,8 +44,7 @@ public class AuthController {
     public Map<String, String> login(@RequestBody User user) {
         // Authenticate
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
-        );
+                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
 
         // Extract authenticated user details
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();

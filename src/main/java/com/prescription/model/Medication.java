@@ -1,4 +1,5 @@
 package com.prescription.model;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -6,7 +7,8 @@ import java.time.LocalDate;
 @Entity
 @Data
 public class Medication {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
     @ManyToOne
     private Prescription prescription;
@@ -16,4 +18,3 @@ public class Medication {
     private LocalDate startDate;
     private LocalDate endDate;
 }
- 
