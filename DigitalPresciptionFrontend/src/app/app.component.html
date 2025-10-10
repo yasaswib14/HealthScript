@@ -1,0 +1,393 @@
+<ng-container *ngIf="!router.url.includes('/dashboard')">
+  <style>
+    :host {
+      background: #bbdefb;
+      min-height: 100vh;
+      font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .split-card {
+      display: flex;
+      max-width: 800px;
+      width: 100%;
+      background: #fff;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 32px rgba(33, 150, 243, 0.12);
+      overflow: hidden;
+      animation: fadeIn 0.7s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .left-section {
+      background: linear-gradient(135deg, #1976d2 70%, #43a047 100%);
+      color: #fff;
+      flex: 1.1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 3rem 2rem;
+      clip-path: polygon(0 0, 100% 0, 80% 100%, 0% 100%);
+      min-width: 260px;
+      position: relative;
+    }
+
+    .left-section .welcome-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+      line-height: 1.1;
+    }
+
+    .left-section .welcome-subtitle {
+      font-size: 1.1rem;
+      margin-bottom: 2.2rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+    }
+
+    .signup-btn {
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      border-radius: 2rem;
+      padding: 0.7rem 2.2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .signup-btn:hover {
+      background: #fff;
+      color: #1976d2;
+    }
+
+    .medical-logo {
+      position: absolute;
+      top: 2rem;
+      left: 2rem;
+      width: 48px;
+      filter: drop-shadow(0 2px 8px #1976d233);
+    }
+
+    .right-section {
+      flex: 1.3;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem 2rem;
+      min-width: 320px;
+      background: #fff;
+    }
+
+    .form-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1976d2;
+      margin-bottom: 1.2rem;
+      text-align: left;
+      width: 100%;
+    }
+
+    form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      position: relative;
+    }
+
+    label {
+      font-size: 1rem;
+      color: #444;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.75rem 2.7rem 0.75rem 1rem;
+      border: 1px solid #bdbdbd;
+      border-radius: 2rem;
+      font-size: 1rem;
+      outline: none;
+      background: #f8fafc;
+      transition: border 0.2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #1976d2;
+      background: #e0e7ff;
+    }
+
+    .input-icon {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.2rem;
+      height: 1.2rem;
+      opacity: 0.7;
+      fill: #1976d2;
+      pointer-events: none;
+    }
+
+    .error {
+      color: #d32f2f;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .login-btn,
+    .register-btn {
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 2rem;
+      padding: 0.85rem 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px #1976d233;
+      margin-top: 0.5rem;
+    }
+
+    .login-btn:hover,
+    .register-btn:hover {
+      background: #43a047;
+      box-shadow: 0 4px 16px #1976d233;
+    }
+
+    .form-links {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
+
+    .forgot-link,
+    .register-link {
+      color: #1976d2;
+      font-size: 0.98rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+      font-weight: 500;
+      margin-left: 1.5rem;
+    }
+
+    .forgot-link:hover,
+    .register-link:hover {
+      color: #43a047;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      .split-card {
+        flex-direction: column;
+        max-width: 98vw;
+      }
+
+      .left-section,
+      .right-section {
+        min-width: unset;
+        padding: 2rem 1rem;
+        clip-path: none;
+        border-radius: 0;
+      }
+
+      .medical-logo {
+        position: static;
+        margin-bottom: 1rem;
+      }
+    }
+  </style>
+
+  <div class="split-card">
+    <!-- Left Section -->
+    <div class="left-section">
+      <img src="assets/Logo.png" alt="Medical Logo" class="medical-logo" />
+      <div class="welcome-title">Welcome To<br>HealthScript</div>
+      <div class="welcome-subtitle">
+        <br>{{ showRegister ? 'Creating your account...' : 'Login for free and manage your prescriptions.' }}
+      </div>
+      <button class="signup-btn" (click)="showRegister = true">
+        {{ showRegister ? 'Fast. Safe. Digital.' : 'Sign Up' }}
+      </button>
+    </div>
+
+    <!-- Right Section -->
+    <div class="right-section">
+      <div class="form-title">{{ showRegister ? 'Register' : 'Login' }}</div>
+
+      <!-- Login Form -->
+      <form *ngIf="!showRegister" #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)">
+        <div class="input-group">
+          <label for="login-username">Username</label>
+          <div class="input-wrapper">
+            <input id="login-username" name="username" type="text" ngModel required autocomplete="username"
+              [class.error]="loginForm.submitted && loginForm.form.controls['username']?.invalid"
+              placeholder="Your Username" />
+            <svg class="input-icon" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20v-2a6 6 0 0 1 12 0v2" />
+            </svg>
+          </div>
+          <div *ngIf="loginForm.submitted && loginForm.form.controls['username']?.invalid" class="error">
+            Please enter your username.
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="login-password">Password</label>
+          <div class="input-wrapper">
+            <input id="login-password" name="password" type="password" ngModel required minlength="6"
+              autocomplete="current-password"
+              [class.error]="loginForm.submitted && loginForm.form.controls['password']?.invalid"
+              placeholder="Your Password" />
+            <svg class="input-icon" viewBox="0 0 24 24">
+              <rect x="6" y="10" width="12" height="8" rx="2" />
+              <path d="M9 10V7a3 3 0 0 1 6 0v3" />
+            </svg>
+          </div>
+          <div *ngIf="loginForm.submitted && loginForm.form.controls['password']?.invalid" class="error">
+            Password must be at least 6 characters.
+          </div>
+        </div>
+        <button type="submit" class="login-btn">Sign In</button>
+        <div class="form-links">
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+      </form>
+
+      <!-- Register Form -->
+      <form *ngIf="showRegister" #registerForm="ngForm" (ngSubmit)="onRegister(registerForm)">
+        <div class="input-group">
+          <label for="register-username">Username</label>
+          <div class="input-wrapper">
+            <input id="register-username" name="username" type="text" ngModel required autocomplete="username"
+              [class.error]="registerForm.submitted && registerForm.form.controls['username']?.invalid"
+              placeholder="Your Username" />
+            <svg class="input-icon" viewBox="0 0 24 24">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20v-2a6 6 0 0 1 12 0v2" />
+            </svg>
+          </div>
+          <div *ngIf="registerForm.submitted && registerForm.form.controls['username']?.invalid" class="error">
+            Please enter your username.
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="register-email">Email</label>
+          <div class="input-wrapper">
+            <input id="register-email" name="email" type="email" ngModel required autocomplete="email"
+              [class.error]="registerForm.submitted && registerForm.form.controls['email']?.invalid"
+              placeholder="Your Email" />
+            <svg class="input-icon" viewBox="0 0 24 24">
+              <rect x="2" y="7" width="20" height="10" rx="2" />
+              <polyline points="2,7 12,13 22,7" />
+            </svg>
+          </div>
+          <div *ngIf="registerForm.submitted && registerForm.form.controls['email']?.invalid" class="error">
+            Please enter a valid email.
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="register-role">Role</label>
+          <div class="input-wrapper">
+            <select id="register-role" name="role" ngModel required
+              (change)="selectedRole = registerForm.form.controls['role']?.value"
+              [class.error]="registerForm.submitted && registerForm.form.controls['role']?.invalid">
+              <option value="" disabled selected>Select role</option>
+              <option value="DOCTOR">Doctor</option>
+              <option value="PATIENT">Patient</option>
+            </select>
+            <svg class="input-icon" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="7" rx="2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <div *ngIf="registerForm.submitted && registerForm.form.controls['role']?.invalid" class="error">
+            Please select your role.
+          </div>
+        </div>
+        <!-- Specialization Select for Doctor -->
+        <div class="input-group" *ngIf="registerForm.form.controls['role']?.value === 'DOCTOR'">
+          <label for="register-specialization">Specialization</label>
+          <div class="input-wrapper">
+            <select id="register-specialization" name="specialization" ngModel required
+              [class.error]="registerForm.submitted && registerForm.form.controls['specialization']?.invalid">
+              <option value="" disabled selected>Select specialization</option>
+              <option value="Cardiologist">Cardiologist</option>
+              <option value="Dermatologist">Dermatologist</option>
+              <option value="Gastroenterologist">Gastroenterologist</option>
+              <option value="Neurology">Neurology</option>
+              <option value="Pediatrician">Pediatrician</option>
+            </select>
+            <svg class="input-icon" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="7" rx="2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+          </div>
+          <div *ngIf="registerForm.submitted && registerForm.form.controls['specialization']?.invalid" class="error">
+            Please select your specialization.
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="register-password">Password</label>
+          <div class="input-wrapper">
+            <input id="register-password" name="password" type="password" ngModel required minlength="6"
+              autocomplete="new-password"
+              [class.error]="registerForm.submitted && registerForm.form.controls['password']?.invalid"
+              placeholder="Your Password" />
+            <svg class="input-icon" viewBox="0 0 24 24">
+              <rect x="6" y="10" width="12" height="8" rx="2" />
+              <path d="M9 10V7a3 3 0 0 1 6 0v3" />
+            </svg>
+          </div>
+          <div *ngIf="registerForm.submitted && registerForm.form.controls['password']?.invalid" class="error">
+            Password must be at least 6 characters.
+          </div>
+        </div>
+        <button type="submit" class="register-btn">Sign Up</button>
+        <div class="form-links" style="justify-content: flex-end;">
+          <a href="#" class="register-link" (click)="showRegister = false">Already have an account? Login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</ng-container>
+<router-outlet></router-outlet>

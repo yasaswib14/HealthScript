@@ -1,0 +1,37 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1>Patient Dashboard</h1>
+        <p>Welcome! Please fill your health details below.</p>
+    </header>
+
+    <div class="form-container">
+        <form #patientForm="ngForm" (ngSubmit)="onSubmit(patientForm)">
+            <div class="input-group">
+                <label>Full Name</label>
+                <input type="text" name="name" ngModel required placeholder="Enter your full name">
+            </div>
+
+            <div class="input-group">
+                <label>Age</label>
+                <input type="number" name="age" ngModel required min="1" placeholder="Enter your age">
+            </div>
+
+            <div class="input-group">
+                <label>Gender</label>
+                <select name="gender" ngModel required>
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Symptoms</label>
+                <textarea name="symptoms" ngModel required rows="4" placeholder="Describe your symptoms"></textarea>
+            </div>
+
+            <button type="submit" class="send-btn">Send</button>
+        </form>
+    </div>
+</div>
