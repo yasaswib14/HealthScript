@@ -6,7 +6,10 @@ import { Router } from '@angular/router';
 bootstrapApplication(AppComponent, appConfig)
   .then(appRef => {
     const router = appRef.injector.get(Router);
-    // 👇 Always reset route to '/'
-    router.navigateByUrl('/');
+
+    // 👇 Ensure app starts at the root route
+    if (router.url !== '/') {
+      router.navigateByUrl('/');
+    }
   })
-  .catch(err => console.error(err));
+  .catch(err => console.error('❌ Error during app bootstrap:', err));

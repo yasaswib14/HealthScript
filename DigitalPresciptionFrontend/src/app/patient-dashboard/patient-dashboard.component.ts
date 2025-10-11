@@ -1,23 +1,22 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './patient-dashboard.component.html',
   styleUrls: ['./patient-dashboard.component.css']
 })
 export class PatientDashboardComponent {
-
   onSubmit(form: NgForm) {
     if (form.valid) {
-      console.log('Form data:', form.value);
-      alert('Patient form submitted successfully!');
+      console.log('Patient form submitted:', form.value);
+      alert('✅ Patient details submitted successfully!');
       form.reset();
     } else {
-      alert('Please fill all required fields!');
+      alert('⚠️ Please fill out all required fields.');
     }
   }
 }

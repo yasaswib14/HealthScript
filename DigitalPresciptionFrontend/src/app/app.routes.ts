@@ -1,9 +1,16 @@
 import { Routes } from '@angular/router';
-import { AppComponent } from './app.component';
+import { AuthComponent } from './auth/auth.component';
 import { PatientDashboardComponent } from './patient-dashboard/patient-dashboard.component';
+// ✅ new import
 
 export const routes: Routes = [
-    // { path: '', component: AppComponent },                 // login/register
-    { path: 'dashboard/patient', component: PatientDashboardComponent }, // dashboard after login
-    { path: '**', redirectTo: '' }                         // fallback
+    { path: '', component: AuthComponent }, // ✅ root login/register page
+
+    // ✅ Patient dashboard route (existing, unchanged)
+    { path: 'dashboard/patient', component: PatientDashboardComponent },
+
+
+
+    // ✅ Fallback to root for unknown routes
+    { path: '**', redirectTo: '' }
 ];

@@ -1,37 +1,35 @@
 <div class="dashboard-container">
-    <header class="dashboard-header">
-        <h1>Patient Dashboard</h1>
-        <p>Welcome! Please fill your health details below.</p>
-    </header>
+    <h2>Welcome, Patient!</h2>
 
-    <div class="form-container">
-        <form #patientForm="ngForm" (ngSubmit)="onSubmit(patientForm)">
-            <div class="input-group">
-                <label>Full Name</label>
-                <input type="text" name="name" ngModel required placeholder="Enter your full name">
-            </div>
+    <form #patientForm="ngForm" (ngSubmit)="onSubmit(patientForm)">
+        <div class="form-group">
+            <label for="name">Patient Name</label>
+            <input id="name" name="name" type="text" ngModel required placeholder="Enter your full name" />
+        </div>
 
-            <div class="input-group">
-                <label>Age</label>
-                <input type="number" name="age" ngModel required min="1" placeholder="Enter your age">
-            </div>
+        <div class="form-group">
+            <label for="age">Age</label>
+            <input id="age" name="age" type="number" ngModel required placeholder="Enter your age" />
+        </div>
 
-            <div class="input-group">
-                <label>Gender</label>
-                <select name="gender" ngModel required>
-                    <option value="" disabled selected>Select your gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="disease">Disease Type</label>
+            <select id="disease" name="disease" ngModel required>
+                <option value="" disabled selected>Select disease / specialist</option>
+                <option value="Cardiologist">Cardiologist</option>
+                <option value="Dermatologist">Dermatologist</option>
+                <option value="Gastroenterologist">Gastroenterologist</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Pediatrician">Pediatrician</option>
+            </select>
+        </div>
 
-            <div class="input-group">
-                <label>Symptoms</label>
-                <textarea name="symptoms" ngModel required rows="4" placeholder="Describe your symptoms"></textarea>
-            </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" ngModel rows="4" required
+                placeholder="Describe your condition or symptoms..."></textarea>
+        </div>
 
-            <button type="submit" class="send-btn">Send</button>
-        </form>
-    </div>
+        <button type="submit">Send Details</button>
+    </form>
 </div>
