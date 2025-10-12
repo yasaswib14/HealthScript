@@ -48,6 +48,15 @@ public class AuthController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(userDetails);
 
-        return Map.of("token", token);
+        // Fetch full user from DB to include role
+        User loggedInUser = userRepository.findByUsername(user.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Return token + role
+        return Map.of(
+                "token", token,
+                "role", loggedInUser.getRole(),
+                "message", "Login successful");
     }
+
 }

@@ -24,18 +24,31 @@ export class AuthComponent {
             const username = form.value['username'];
             const password = form.value['password'];
 
-            this.http.post('http://localhost:8081/auth/login', { username, password })
+            this.http.post<{ token: string; role: string }>('http://localhost:8081/auth/login', { username, password })
                 .subscribe({
-                    next: () => {
+                    next: (response) => {
                         alert('Login successful!');
-                        this.router.navigateByUrl('/dashboard/patient');
+
+                        // Save token to localStorage for later use
+                        localStorage.setItem('jwtToken', response.token);
+                        localStorage.setItem('userRole', response.role);
+
+                        // Redirect based on role
+                        if (response.role === 'ROLE_DOCTOR') {
+                            this.router.navigateByUrl('/doctor-dashboard');
+                        } else if (response.role === 'ROLE_PATIENT') {
+                            this.router.navigateByUrl('/patient-dashboard');
+                        } else {
+                            alert('Unknown role: ' + response.role);
+                        }
                     },
                     error: (err) => {
-                        alert(err.error || 'Invalid credentials. Please try again.');
+                        alert(err.error?.message || 'Invalid credentials. Please try again.');
                     }
                 });
         }
     }
+
 
     onRegister(form: NgForm) {
         if (form.valid) {
