@@ -77,10 +77,10 @@ export class DoctorDashboardComponent implements OnInit {
             });
     }
 
-    // ✅ Respond to a patient's message
+    // ✅ Respond to a patient's message (now includes dosageTiming & durationDays)
     respondToPatient(messageId: number, form: NgForm) {
         if (!form.valid) {
-            alert('⚠️ Please enter both diagnosis and medication.');
+            alert('⚠️ Please fill out required fields (diagnosis & medication).');
             return;
         }
 
@@ -96,9 +96,16 @@ export class DoctorDashboardComponent implements OnInit {
             'Content-Type': 'application/json'
         });
 
+        // read and sanitize optional fields
+        const dosageTiming = form.value.dosageTiming || '';
+        // durationDays may come as string from form control; make integer (0 if blank/NaN)
+        const durationDays = form.value.durationDays ? Number(form.value.durationDays) : 0;
+
         const payload = {
             diagnosis: form.value.diagnosis,
-            medication: form.value.medication
+            medication: form.value.medication,
+            dosageTiming: dosageTiming,
+            durationDays: Number.isNaN(durationDays) ? 0 : durationDays
         };
 
         this.http.post(`http://localhost:8081/doctor/respond/${messageId}`, payload, { headers })
@@ -106,6 +113,10 @@ export class DoctorDashboardComponent implements OnInit {
                 next: () => {
                     alert('✅ Prescription sent successfully!');
                     form.reset();
+                    // optionally refresh messages to reflect state
+                    const authToken = localStorage.getItem('jwtToken') || '';
+                    const hdrs = new HttpHeaders({ 'Authorization': `Bearer ${authToken}` });
+                    this.fetchMessages(hdrs);
                 },
                 error: (err) => {
                     console.error('❌ Error sending prescription:', err);

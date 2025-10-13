@@ -1,119 +1,254 @@
-.doctor-dashboard {
-    max-width: 900px;
-    margin: 50px auto;
-    padding: 30px;
-    background-color: #f9fafb;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', sans-serif;
+/* ===============================
+   ⚕️ DOCTOR DASHBOARD – GLASS LIGHT THEME
+   =============================== */
+:root {
+    --primary: #0077ff;
+    --secondary: #00c2ff;
+    --success: #16a34a;
+    --error: #ef4444;
+    --text-dark: #1e293b;
+    --text-light: #f8fafc;
+    --muted: #64748b;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.08);
+    --glow-blue: 0 0 25px rgba(0, 153, 255, 0.3);
 }
 
+/* ===== Container ===== */
+.doctor-dashboard {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 40px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #e3f2fd, #f9fbff);
+    box-shadow: var(--shadow-soft);
+    font-family: "Poppins", sans-serif;
+    animation: fadeIn 0.9s ease-out;
+}
+
+/* ===== Header ===== */
 .header {
     text-align: center;
-    color: #1e3a8a;
-    margin-bottom: 5px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: slideDown 0.8s ease;
 }
 
 .subtext {
     text-align: center;
-    color: #555;
-    margin-bottom: 20px;
+    color: var(--muted);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
 }
 
+/* ===== Status Box ===== */
 .status-box {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 24px;
+    font-weight: 600;
+    color: var(--primary);
     text-align: center;
-    padding: 10px;
-    background-color: #eef2ff;
-    border: 1px solid #c7d2fe;
-    border-radius: 8px;
+    box-shadow: var(--glow-blue);
+    margin-bottom: 30px;
+    border: 1px solid rgba(0, 119, 255, 0.2);
+}
+
+/* ===== Messages Header ===== */
+h2 {
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 20px;
-    font-size: 14px;
 }
 
-.status-box .ok {
-    color: green;
-}
-
-.status-box .error {
-    color: red;
-}
-
-.messages-section {
-    margin-top: 20px;
-}
-
+/* ===== Message Card ===== */
 .message-card {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 24px 0;
+    box-shadow: 0 6px 18px rgba(0, 119, 255, 0.12);
+    border: 1px solid rgba(0, 119, 255, 0.2);
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease-in-out;
 }
 
 .message-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 119, 255, 0.25);
 }
 
+/* ===== Message Info ===== */
 .message-header {
-    display: flex;
-    justify-content: space-between;
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.message-body {
+    background: rgba(240, 247, 255, 0.8);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 10px;
+    color: var(--text-dark);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.timestamp {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: right;
+    margin-top: 5px;
+}
+
+/* ===== Form Styling ===== */
+.prescription-form {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
     align-items: center;
-    color: #111827;
-}
-
-.content {
-    margin: 10px 0;
-    color: #374151;
-    font-size: 15px;
-}
-
-.form-group {
-    margin-bottom: 10px;
 }
 
 .input-field {
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    font-size: 14px;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    transition: all 0.25s ease;
 }
 
+.input-field::placeholder {
+    color: #9ca3af;
+}
+
+.input-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(0, 119, 255, 0.3);
+    transform: scale(1.02);
+    outline: none;
+}
+
+/* ===== Button Styling ===== */
 .respond-btn {
-    background-color: #2563eb;
-    color: white;
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
     border: none;
-    padding: 8px 14px;
-    border-radius: 6px;
+    color: rgb(60, 121, 220);
+    font-weight: 600;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 1rem;
     cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.respond-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+}
+
+.respond-btn:hover::before {
+    left: 130%;
 }
 
 .respond-btn:hover {
-    background-color: #1d4ed8;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(0, 119, 255, 0.4);
+    background-color: #16a34a;
+    color: #f9fbff;
 }
 
-.no-messages {
-    text-align: center;
-    color: #6b7280;
-    font-style: italic;
-}
-
+/* ===== Logout Button ===== */
 .logout-btn {
     display: block;
-    margin: 30px auto 0;
-    padding: 10px 20px;
+    width: 100%;
+    margin-top: 40px;
+    padding: 14px;
     border: none;
-    border-radius: 8px;
-    background-color: #ef4444;
-    color: white;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--error), #f87171);
+    color: rgb(15, 13, 13);
+    font-weight: 600;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.logout-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+}
+
+.logout-btn:hover::before {
+    left: 130%;
 }
 
 .logout-btn:hover {
-    background-color: #dc2626;
+    background: #dc2626;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(0, 119, 255, 0.4);
+
+    color: #f9fbff;
+
+}
+
+
+/* ===== Loader ===== */
+p {
+    text-align: center;
+    color: var(--muted);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

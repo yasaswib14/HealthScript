@@ -3,18 +3,20 @@ package com.prescription.controller;
 import com.prescription.model.Message;
 import com.prescription.model.Prescription;
 import com.prescription.model.User;
+import com.prescription.model.Medication;
 import com.prescription.repository.MessageRepository;
 import com.prescription.repository.PrescriptionRepository;
 import com.prescription.repository.UserRepository;
+import com.prescription.repository.MedicationRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/doctor")
@@ -24,13 +26,17 @@ public class DoctorController {
     private final MessageRepository messageRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final UserRepository userRepository;
+    private final MedicationRepository medicationRepository;
 
+    // Constructor injection (keeps consistent style)
     public DoctorController(MessageRepository messageRepository,
             PrescriptionRepository prescriptionRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            MedicationRepository medicationRepository) {
         this.messageRepository = messageRepository;
         this.prescriptionRepository = prescriptionRepository;
         this.userRepository = userRepository;
+        this.medicationRepository = medicationRepository;
     }
 
     // ✅ Dashboard test
@@ -58,7 +64,18 @@ public class DoctorController {
         return ResponseEntity.ok(messages);
     }
 
-    // ✅ Doctor responds to patient with a prescription
+    /**
+     * Doctor responds to patient with a prescription.
+     *
+     * Now accepts additional medication scheduling fields:
+     * - dosageTiming (String, e.g. "Morning, Night")
+     * - durationDays (int)
+     *
+     * Will save:
+     * - Prescription (existing behavior)
+     * - Medication (new): links the prescription and patient and stores schedule
+     * info
+     */
     @PostMapping("/respond/{messageId}")
     public ResponseEntity<?> respondToMessage(
             @PathVariable Long messageId,
@@ -78,22 +95,55 @@ public class DoctorController {
             return ResponseEntity.badRequest().body("Doctor not found");
         }
 
+        // create and save prescription
         Prescription prescription = new Prescription();
         prescription.setDoctor(doctor);
         prescription.setPatient(message.getSender());
+        // If your Prescription entity has a message field comment/uncomment as needed:
         // prescription.setMessage(message);
         prescription.setDiagnosis(request.getDiagnosis());
         prescription.setMedication(request.getMedication());
         prescription.setIssuedAt(LocalDateTime.now());
 
-        Prescription saved = prescriptionRepository.save(prescription);
-        return ResponseEntity.ok(saved);
+        Prescription savedPrescription = prescriptionRepository.save(prescription);
+
+        // Create and save Medication record for reminders (if medication info provided)
+        try {
+            String medName = request.getMedication();
+            String dosageTiming = request.getDosageTiming(); // may be null
+            int durationDays = request.getDurationDays() <= 0 ? 0 : request.getDurationDays();
+
+            // Only create Medication entity if medication name provided
+            if (medName != null && !medName.trim().isEmpty()) {
+                Medication med = new Medication();
+                med.setPrescription(savedPrescription);
+                med.setPatient(message.getSender());
+                med.setMedicationName(medName);
+                med.setDosageTiming(dosageTiming != null ? dosageTiming : "");
+                med.setDurationDays(durationDays);
+
+                LocalDate start = LocalDate.now();
+                med.setStartDate(start);
+                // If durationDays is zero or negative, we can set endDate = start (single day)
+                // or null.
+                med.setEndDate(durationDays > 0 ? start.plusDays(durationDays) : start);
+
+                medicationRepository.save(med);
+            }
+        } catch (Exception ex) {
+            // Non-fatal: medication creation failure should not break prescription save
+            System.err.println("WARNING: failed to create Medication entry: " + ex.getMessage());
+        }
+
+        return ResponseEntity.ok(savedPrescription);
     }
 
-    // ✅ DTO for prescription
+    // ✅ DTO for prescription (extended)
     public static class PrescriptionRequest {
         private String diagnosis;
         private String medication;
+        private String dosageTiming; // optional, e.g. "Morning, Night"
+        private int durationDays; // optional
 
         public String getDiagnosis() {
             return diagnosis;
@@ -109,6 +159,22 @@ public class DoctorController {
 
         public void setMedication(String medication) {
             this.medication = medication;
+        }
+
+        public String getDosageTiming() {
+            return dosageTiming;
+        }
+
+        public void setDosageTiming(String dosageTiming) {
+            this.dosageTiming = dosageTiming;
+        }
+
+        public int getDurationDays() {
+            return durationDays;
+        }
+
+        public void setDurationDays(int durationDays) {
+            this.durationDays = durationDays;
         }
     }
 }
