@@ -81,7 +81,7 @@
         </div>
 
         <!-- 👇 Show Specialization if Doctor is selected -->
-        <div class="input-group" *ngIf="registerForm.form.controls['role']?.value === 'DOCTOR'">
+        <div class="input-group" *ngIf="registerForm.form.controls['role']?.value === 'ROLE_DOCTOR'">
           <label for="register-specialization">Specialization</label>
           <div class="input-wrapper">
             <select id="register-specialization" name="specialization" ngModel required>

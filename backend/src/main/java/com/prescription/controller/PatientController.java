@@ -5,15 +5,19 @@ import com.prescription.model.User;
 import com.prescription.repository.MessageRepository;
 import com.prescription.repository.UserRepository;
 import com.prescription.security.CustomUserDetails;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/patient")
+@Tag(name = "Patient APIs")
 public class PatientController {
 
     private final MessageRepository messageRepository;
@@ -24,6 +28,7 @@ public class PatientController {
         this.userRepository = userRepository;
     }
 
+    // ✅ Patient Dashboard
     @GetMapping("/dashboard")
     public String dashboard(Authentication authentication) {
         String username = authentication.getName();
@@ -31,14 +36,14 @@ public class PatientController {
     }
 
     /**
-     * Accept a patient submission and persist it as a Message.
-     * Example POST body:
-     * {
-     * "content": "I have headache and fever",
-     * "receiverId": 2
-     * }
+     * ✅ Patient submits a form with diseaseType & description.
+     * Automatically routes to the doctor of same specialization.
      *
-     * receiverId is optional (you may set it to a doctor's user id later).
+     * Example POST:
+     * {
+     * "diseaseType": "Cardiologist",
+     * "content": "I have chest pain and shortness of breath"
+     * }
      */
     @PostMapping("/submit-form")
     public ResponseEntity<?> submitForm(@RequestBody MessageDto dto, Authentication authentication) {
@@ -46,48 +51,55 @@ public class PatientController {
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        // Resolve sender User
-        Object principal = authentication.getPrincipal();
-        User sender = null;
-
-        if (principal instanceof CustomUserDetails) {
-            sender = ((CustomUserDetails) principal).getUser();
-        } else {
-            // fallback: try to lookup by username
-            String username = authentication.getName();
-            Optional<User> optUser = userRepository.findByUsername(username);
-            if (optUser.isPresent()) {
-                sender = optUser.get();
-            }
-        }
-
+        // ✅ Get patient (sender)
+        User sender = resolveUser(authentication);
         if (sender == null) {
-            return ResponseEntity.status(400).body("Could not resolve sender user");
+            return ResponseEntity.badRequest().body("Invalid user session");
         }
 
-        // Build Message
-        Message message = new Message();
-        message.setSender(sender);
-        message.setContent(dto.getContent());
-        message.setTimestamp(LocalDateTime.now());
+        // ✅ Find all doctors with this specialization
+        List<User> doctors = userRepository.findAllByRoleAndSpecialization("ROLE_DOCTOR", dto.getDiseaseType());
 
-        // If receiverId provided, try to set receiver
-        if (dto.getReceiverId() != null) {
-            Optional<User> optReceiver = userRepository.findById(dto.getReceiverId());
-            optReceiver.ifPresent(message::setReceiver);
+        if (doctors.isEmpty()) {
+            return ResponseEntity.badRequest().body("No doctor found with specialization: " + dto.getDiseaseType());
         }
 
-        Message saved = messageRepository.save(message);
+        // ✅ Create a message for each doctor
+        List<Message> sentMessages = new ArrayList<>();
 
-        return ResponseEntity.ok(saved);
+        for (User receiver : doctors) {
+            Message message = new Message();
+            message.setSender(sender);
+            message.setReceiver(receiver);
+            message.setContent(dto.getContent());
+            message.setTimestamp(LocalDateTime.now());
+            sentMessages.add(messageRepository.save(message));
+        }
+
+        return ResponseEntity
+                .ok("✅ Sent to " + doctors.size() + " doctor(s) with specialization: " + dto.getDiseaseType());
     }
 
-    // DTO for incoming JSON
-    public static class MessageDto {
-        private String content;
-        private Long receiverId; // optional; doctor id (set later from frontend)
+    // ✅ Helper to extract User object
+    private User resolveUser(Authentication authentication) {
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails) {
+            return ((CustomUserDetails) principal).getUser();
+        }
+        return userRepository.findByUsername(authentication.getName()).orElse(null);
+    }
 
-        public MessageDto() {
+    // ✅ DTO for Patient submission
+    public static class MessageDto {
+        private String diseaseType;
+        private String content;
+
+        public String getDiseaseType() {
+            return diseaseType;
+        }
+
+        public void setDiseaseType(String diseaseType) {
+            this.diseaseType = diseaseType;
         }
 
         public String getContent() {
@@ -96,14 +108,6 @@ public class PatientController {
 
         public void setContent(String content) {
             this.content = content;
-        }
-
-        public Long getReceiverId() {
-            return receiverId;
-        }
-
-        public void setReceiverId(Long receiverId) {
-            this.receiverId = receiverId;
         }
     }
 }

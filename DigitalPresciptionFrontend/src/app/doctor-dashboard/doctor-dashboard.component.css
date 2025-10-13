@@ -1,42 +1,119 @@
-.dashboard-container {
+.doctor-dashboard {
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #f9fafb;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.header {
     text-align: center;
-    padding: 40px;
-    font-family: "Inter", sans-serif;
-    background: linear-gradient(180deg, #e3f2fd, #bbdefb);
-    height: 100vh;
+    color: #1e3a8a;
+    margin-bottom: 5px;
 }
 
-h1 {
-    font-size: 2rem;
-    color: #1565c0;
-    margin-bottom: 0.5rem;
+.subtext {
+    text-align: center;
+    color: #555;
+    margin-bottom: 20px;
 }
 
-.sub {
-    color: #333;
-    margin-bottom: 2rem;
+.status-box {
+    text-align: center;
+    padding: 10px;
+    background-color: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
 }
 
-.api-section {
-    background: white;
-    display: inline-block;
-    padding: 1rem 2rem;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+.status-box .ok {
+    color: green;
+}
+
+.status-box .error {
+    color: red;
+}
+
+.messages-section {
+    margin-top: 20px;
+}
+
+.message-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.message-card:hover {
+    transform: translateY(-3px);
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #111827;
+}
+
+.content {
+    margin: 10px 0;
+    color: #374151;
+    font-size: 15px;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.respond-btn {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.respond-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.no-messages {
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
 }
 
 .logout-btn {
-    margin-top: 30px;
+    display: block;
+    margin: 30px auto 0;
     padding: 10px 20px;
     border: none;
-    background: #0d47a1;
+    border-radius: 8px;
+    background-color: #ef4444;
     color: white;
-    border-radius: 6px;
     cursor: pointer;
-    font-size: 1rem;
-    transition: background 0.3s;
+    transition: background-color 0.2s ease;
 }
 
 .logout-btn:hover {
-    background: #1565c0;
+    background-color: #dc2626;
 }

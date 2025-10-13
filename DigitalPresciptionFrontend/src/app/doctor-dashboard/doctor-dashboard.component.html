@@ -1,11 +1,52 @@
-<div class="dashboard-container">
-    <h1>{{ message }}</h1>
-    <p class="sub">You are logged in as a <strong>Doctor</strong>.</p>
+<div class="doctor-dashboard">
+    <h1 class="header">👨‍⚕️ Doctor Dashboard</h1>
+    <p class="subtext">Welcome, Doctor</p>
 
-    <div class="api-section">
-        <h3>Backend Response:</h3>
-        <p>{{ apiMessage }}</p>
+    <div class="status-box">
+        <strong>Status:</strong> {{ apiMessage }}
     </div>
 
-    <button class="logout-btn" (click)="logout()">Logout</button>
+    <hr>
+
+    <h2>📩 Patient Messages</h2>
+
+    <!-- ✅ Show loader while fetching -->
+    <div *ngIf="isLoading">
+        <p>Loading patient messages...</p>
+    </div>
+
+    <!-- ✅ Show messages once loaded -->
+    <div *ngIf="!isLoading && messages && messages.length > 0">
+        <div *ngFor="let msg of messages" class="message-card">
+            <div class="message-header">
+                <strong>From:</strong> {{ msg.sender?.username }}
+            </div>
+
+            <div class="message-body">
+                <p><strong>Message:</strong> {{ msg.content }}</p>
+                <p><strong>Time:</strong> {{ msg.timestamp | date:'medium' }}</p>
+            </div>
+
+            <!-- Respond form -->
+            <form #prescriptionForm="ngForm" (ngSubmit)="respondToPatient(msg.id, prescriptionForm)"
+                class="prescription-form">
+                <input type="text" name="diagnosis" ngModel required placeholder="Enter diagnosis"
+                    class="input-field" />
+                <input type="text" name="medication" ngModel required placeholder="Enter medication"
+                    class="input-field" />
+                <button type="submit" [disabled]="prescriptionForm.invalid" class="respond-btn">
+                    💊 Send Prescription
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ✅ Show fallback when loaded but empty -->
+    <div *ngIf="!isLoading && (!messages || messages.length === 0)">
+        <p>No messages assigned to you yet 🕊️</p>
+    </div>
+
+    <hr>
+
+    <button class="logout-btn" (click)="logout()">🚪 Logout</button>
 </div>

@@ -4,11 +4,13 @@ import com.prescription.model.SideEffectLog;
 import com.prescription.service.SideEffectLogService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/side-effects")
+@Tag(name = "sideEffects APIs")
 public class SideEffectLogController {
     private final SideEffectLogService service;
 
@@ -18,15 +20,21 @@ public class SideEffectLogController {
 
     @PreAuthorize("hasAnyRole('DOCTOR','PATIENT')")
     @GetMapping
-    public List<SideEffectLog> getAll() { return service.getAll(); }
+    public List<SideEffectLog> getAll() {
+        return service.getAll();
+    }
 
     @PreAuthorize("hasAnyRole('DOCTOR','PATIENT')")
     @GetMapping("/{id}")
-    public SideEffectLog getById(@PathVariable Long id) { return service.getById(id); }
+    public SideEffectLog getById(@PathVariable Long id) {
+        return service.getById(id);
+    }
 
     @PreAuthorize("hasRole('PATIENT')")
     @PostMapping
-    public SideEffectLog create(@RequestBody SideEffectLog log) { return service.save(log); }
+    public SideEffectLog create(@RequestBody SideEffectLog log) {
+        return service.save(log);
+    }
 
     @PreAuthorize("hasRole('PATIENT')")
     @PutMapping("/{id}")
@@ -37,5 +45,7 @@ public class SideEffectLogController {
 
     @PreAuthorize("hasRole('PATIENT')")
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) { service.delete(id); }
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
+    }
 }

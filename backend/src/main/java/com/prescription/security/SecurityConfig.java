@@ -43,7 +43,13 @@ public class SecurityConfig {
                 // Authorization rules
                 // inside SecurityConfig.securityFilterChain(HttpSecurity http)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login").permitAll()
+                        .requestMatchers(
+                                "/auth/register",
+                                "/auth/login",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html")
+                        .permitAll()
                         .requestMatchers("/doctor/**").hasRole("DOCTOR")
                         .requestMatchers("/patient/**").hasRole("PATIENT")
                         .anyRequest().authenticated())

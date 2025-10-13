@@ -1,9 +1,8 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -11,16 +10,16 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
 
-    // Routing setup
+    // ✅ Routing setup
     provideRouter(routes),
 
-    // Angular hydration for SSR
+    // ✅ SSR Hydration (no withNoDomReuse in stable versions)
     provideClientHydration(withEventReplay()),
 
-    // ✅ Add HttpClient support (for backend API calls)
-    provideHttpClient(),
+    // ✅ HttpClient + Fetch API
+    provideHttpClient(withFetch()),
 
-    // ✅ Add FormsModule support (for ngModel, forms, etc.)
+    // ✅ Template-driven forms
     importProvidersFrom(FormsModule)
   ]
 };

@@ -9,11 +9,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Auth APIs")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;

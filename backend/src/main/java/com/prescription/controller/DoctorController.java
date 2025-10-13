@@ -6,6 +6,7 @@ import com.prescription.model.User;
 import com.prescription.repository.MessageRepository;
 import com.prescription.repository.PrescriptionRepository;
 import com.prescription.repository.UserRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/doctor")
+@Tag(name = "Doctor APIs")
 public class DoctorController {
 
     private final MessageRepository messageRepository;
@@ -30,29 +33,32 @@ public class DoctorController {
         this.userRepository = userRepository;
     }
 
-    // ✅ Simple test dashboard (keep this for confirmation)
+    // ✅ Dashboard test
     @GetMapping("/dashboard")
     public ResponseEntity<String> dashboard(Authentication authentication) {
-        System.out.println("DEBUG >>> Authenticated user: " + authentication.getName());
-        System.out.println("DEBUG >>> Authorities: " + authentication.getAuthorities());
         return ResponseEntity.ok("Welcome Doctor " + authentication.getName());
     }
 
-    // ✅ View all messages for the logged-in doctor
+    // ✅ Get all messages assigned to this doctor (filtered by specialization)
     @GetMapping("/messages")
     public ResponseEntity<?> getMessages(Authentication authentication) {
         String username = authentication.getName();
-        User doctor = userRepository.findByUsername(username).orElse(null);
+        System.out.println("DEBUG >>> Logged-in doctor username: " + username);
 
+        User doctor = userRepository.findByUsername(username).orElse(null);
         if (doctor == null) {
             return ResponseEntity.badRequest().body("Doctor not found");
         }
 
+        System.out.println("DEBUG >>> Doctor ID: " + doctor.getId());
+
         List<Message> messages = messageRepository.findByReceiver_Id(doctor.getId());
+        System.out.println("DEBUG >>> Messages found: " + messages.size());
+
         return ResponseEntity.ok(messages);
     }
 
-    // ✅ Respond to a patient's message
+    // ✅ Doctor responds to patient with a prescription
     @PostMapping("/respond/{messageId}")
     public ResponseEntity<?> respondToMessage(
             @PathVariable Long messageId,
@@ -84,7 +90,7 @@ public class DoctorController {
         return ResponseEntity.ok(saved);
     }
 
-    // Inner DTO class
+    // ✅ DTO for prescription
     public static class PrescriptionRequest {
         private String diagnosis;
         private String medication;
@@ -106,4 +112,3 @@ public class DoctorController {
         }
     }
 }
-// updated one
