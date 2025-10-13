@@ -2,10 +2,13 @@ package com.prescription.controller;
 
 import com.prescription.model.Message;
 import com.prescription.model.User;
+import com.prescription.model.Prescription;
 import com.prescription.repository.MessageRepository;
 import com.prescription.repository.UserRepository;
+import com.prescription.repository.PrescriptionRepository;
 import com.prescription.security.CustomUserDetails;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +26,9 @@ public class PatientController {
     private final MessageRepository messageRepository;
     private final UserRepository userRepository;
 
+    @Autowired
+    private PrescriptionRepository prescriptionRepository;
+
     public PatientController(MessageRepository messageRepository, UserRepository userRepository) {
         this.messageRepository = messageRepository;
         this.userRepository = userRepository;
@@ -37,13 +43,7 @@ public class PatientController {
 
     /**
      * ✅ Patient submits a form with diseaseType & description.
-     * Automatically routes to the doctor of same specialization.
-     *
-     * Example POST:
-     * {
-     * "diseaseType": "Cardiologist",
-     * "content": "I have chest pain and shortness of breath"
-     * }
+     * Automatically routes to the doctor(s) of that specialization.
      */
     @PostMapping("/submit-form")
     public ResponseEntity<?> submitForm(@RequestBody MessageDto dto, Authentication authentication) {
@@ -66,7 +66,6 @@ public class PatientController {
 
         // ✅ Create a message for each doctor
         List<Message> sentMessages = new ArrayList<>();
-
         for (User receiver : doctors) {
             Message message = new Message();
             message.setSender(sender);
@@ -80,7 +79,24 @@ public class PatientController {
                 .ok("✅ Sent to " + doctors.size() + " doctor(s) with specialization: " + dto.getDiseaseType());
     }
 
-    // ✅ Helper to extract User object
+    /**
+     * ✅ Fetch prescriptions created by doctors for this patient.
+     */
+    @GetMapping("/prescriptions")
+    public ResponseEntity<List<Prescription>> getPrescriptionsForPatient(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String username = authentication.getName();
+        User patient = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        List<Prescription> prescriptions = prescriptionRepository.findByPatient(patient);
+        return ResponseEntity.ok(prescriptions);
+    }
+
+    // ✅ Helper to extract User object from Authentication
     private User resolveUser(Authentication authentication) {
         Object principal = authentication.getPrincipal();
         if (principal instanceof CustomUserDetails) {
@@ -89,7 +105,7 @@ public class PatientController {
         return userRepository.findByUsername(authentication.getName()).orElse(null);
     }
 
-    // ✅ DTO for Patient submission
+    // ✅ DTO for Patient form submission
     public static class MessageDto {
         private String diseaseType;
         private String content;

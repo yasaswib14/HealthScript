@@ -1,6 +1,7 @@
 <div class="dashboard-container">
     <h2>Welcome, Patient!</h2>
 
+    <!-- ✅ Patient Request Form -->
     <form #patientForm="ngForm" (ngSubmit)="onSubmit(patientForm)">
         <div class="form-group">
             <label for="name">Patient Name</label>
@@ -33,4 +34,31 @@
 
         <button type="submit">Send Details</button>
     </form>
+
+    <hr />
+
+    <!-- ✅ My Prescriptions Section -->
+    <div class="prescriptions-container">
+        <h3>💊 My Prescriptions</h3>
+
+        <div *ngIf="isLoading">
+            <p>Loading prescriptions...</p>
+        </div>
+
+        <div *ngIf="!isLoading && prescriptions.length === 0">
+            <p>No prescriptions yet.</p>
+        </div>
+
+        <div *ngIf="!isLoading && prescriptions.length > 0" class="prescription-list">
+            <div *ngFor="let p of prescriptions" class="prescription-card">
+                <h4>
+                    Dr. {{ p.doctor?.username }}
+                    <span *ngIf="p.doctor?.specialization">({{ p.doctor.specialization }})</span>
+                </h4>
+                <p><strong>Diagnosis:</strong> {{ p.diagnosis }}</p>
+                <p><strong>Medication:</strong> {{ p.medication }}</p>
+                <p><small><strong>Issued At:</strong> {{ p.issuedAt | date:'medium' }}</small></p>
+            </div>
+        </div>
+    </div>
 </div>

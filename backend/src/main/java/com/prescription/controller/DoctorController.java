@@ -81,7 +81,7 @@ public class DoctorController {
         Prescription prescription = new Prescription();
         prescription.setDoctor(doctor);
         prescription.setPatient(message.getSender());
-        prescription.setMessage(message);
+        // prescription.setMessage(message);
         prescription.setDiagnosis(request.getDiagnosis());
         prescription.setMedication(request.getMedication());
         prescription.setIssuedAt(LocalDateTime.now());
