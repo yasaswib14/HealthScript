@@ -3,6 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router'; // ✅ Added import
 
 @Component({
   selector: 'app-patient-dashboard',
@@ -15,11 +16,11 @@ export class PatientDashboardComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router); // ✅ Inject router
 
   prescriptions: any[] = [];
   isLoading: boolean = false;
 
-  // ✅ Safe alert for SSR (avoids `window.alert` crash)
   private safeAlert(message: string): void {
     if (isPlatformBrowser(this.platformId)) {
       alert(message);
@@ -38,7 +39,6 @@ export class PatientDashboardComponent implements OnInit {
     }
   }
 
-  // ✅ Fetch prescriptions for the logged-in patient
   private loadPrescriptions(headers: HttpHeaders): void {
     this.isLoading = true;
     this.http.get('http://localhost:8081/patient/prescriptions', { headers })
@@ -47,7 +47,7 @@ export class PatientDashboardComponent implements OnInit {
           console.log('💊 Prescriptions fetched:', data);
           this.prescriptions = data || [];
           this.isLoading = false;
-          this.cdr.detectChanges(); // Force re-render
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('❌ Error fetching prescriptions:', err);
@@ -57,7 +57,6 @@ export class PatientDashboardComponent implements OnInit {
       });
   }
 
-  // ✅ Handle form submission
   onSubmit(form: NgForm): void {
     if (!form.valid) {
       this.safeAlert('⚠️ Please fill out all required fields.');
@@ -90,8 +89,6 @@ export class PatientDashboardComponent implements OnInit {
           console.log('✅ Form submitted:', res);
           this.safeAlert(res);
           form.reset();
-
-          // ✅ Reload prescriptions after sending form
           this.loadPrescriptions(headers);
         },
         error: (err) => {
@@ -99,5 +96,13 @@ export class PatientDashboardComponent implements OnInit {
           this.safeAlert('❌ Failed to send details. Please try again.');
         }
       });
+  }
+
+  // ✅ Logout method
+  logout(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('jwtToken');
+    }
+    this.router.navigate(['/']); // Redirect to login
   }
 }

@@ -108,3 +108,18 @@ button:hover {
     margin: 0.3rem 0;
     font-size: 0.95rem;
 }
+
+.logout-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+    background-color: #b02a37;
+}
