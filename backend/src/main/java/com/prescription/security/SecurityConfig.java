@@ -50,8 +50,8 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html")
                         .permitAll()
-                        .requestMatchers("/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/patient/**").hasRole("PATIENT")
+                        .requestMatchers("/doctor/**").hasAuthority("ROLE_DOCTOR")
+                        .requestMatchers("/patient/**").hasAnyAuthority("ROLE_PATIENT")
                         .anyRequest().authenticated())
 
                 // Stateless session

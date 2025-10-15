@@ -54,13 +54,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String jwt = authHeader.substring(7);
         final String username = jwtUtil.extractUsername(jwt);
+       
 
         logger.debug("JwtAuthenticationFilter: token for username = {}", username);
+        logger.info("Authorization header: {}", authHeader);
+        logger.info("Extracted username from JWT: {}", username);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+            logger.info("Loaded userDetails for username: {}", userDetails);
 
             if (jwtUtil.validateToken(jwt, userDetails)) {
+                logger.info("JWT validated for user: {}", username);
                 // extract claims and roles
                 Claims claims = jwtUtil.extractAllClaims(jwt);
                 Object rolesObj = claims.get("roles");
@@ -93,8 +98,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 logger.info("Final authorities set in context: {}", authorities);
             } else {
-                logger.debug("JwtAuthenticationFilter: token validation failed for user {}", username);
+                logger.warn("JWT validation failed for user: {}", username);
             }
+        } else {
+            logger.warn("Username is null or authentication already set.");
         }
 
         filterChain.doFilter(request, response);
