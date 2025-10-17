@@ -4,11 +4,11 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router'; // ✅ Added import
-
+import { TodayRemindersComponent } from '../medication-reminder/today-reminders/today-reminders.component'; // <-- IMPORT IT
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [FormsModule, CommonModule, HttpClientModule],
+  imports: [FormsModule, CommonModule, HttpClientModule, TodayRemindersComponent],
   templateUrl: './patient-dashboard.component.html',
   styleUrls: ['./patient-dashboard.component.css']
 })
