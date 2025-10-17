@@ -16,6 +16,7 @@ export class AuthComponent {
     protected readonly title = signal('DigitalPrescriptionFrontend');
     showRegister = false;
     selectedRole = '';
+    isRedirecting = false; // NEW flag to show blur + overlay
 
     constructor(private http: HttpClient, public router: Router) { }
 
@@ -62,6 +63,7 @@ export class AuthComponent {
 
     /**
      * ✅ Register new user (Doctor or Patient)
+     * Shows blur + "Redirecting..." then switches to the login view (no alerts)
      */
     onRegister(form: NgForm) {
         if (form.valid) {
@@ -75,8 +77,19 @@ export class AuthComponent {
                 specialization
             }).subscribe({
                 next: () => {
-                    alert('Registration successful! You can now log in.');
+                    // show blur + overlay, hide register form, then navigate to login
+                    this.isRedirecting = true;
                     this.showRegister = false;
+
+                    // short pause to show the overlay, then navigate (and remove overlay)
+                    setTimeout(() => {
+                        // ensure login view is visible
+                        this.showRegister = false;
+                        // navigate to /auth (keeps user on the auth page but shows login view)
+                        this.router.navigateByUrl('/auth').finally(() => {
+                            this.isRedirecting = false;
+                        });
+                    }, 900); // 900ms looks smooth; adjust as desired
                 },
                 error: (err) => {
                     alert(err.error || 'Registration failed. Please try again.');
