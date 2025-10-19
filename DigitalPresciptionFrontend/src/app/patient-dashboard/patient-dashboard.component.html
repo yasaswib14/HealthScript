@@ -1,69 +1,115 @@
 <div class="dashboard-container">
     <h2>Welcome, Patient!</h2>
+    <div class="header-user-info">
+        <span>Welcome, Yass</span>
+        <button class="logout-btn" (click)="logout()">Logout</button>
+    </div>
 
-    <!-- ✅ Patient Request Form -->
-    <form #patientForm="ngForm" (ngSubmit)="onSubmit(patientForm)">
-        <div class="form-group">
-            <label for="name">Patient Name</label>
-            <input id="name" name="name" type="text" ngModel required placeholder="Enter your full name" />
+    <ng-container *ngIf="currentView === 'menu'">
+        <div class="feature-cards-container">
+            
+            <div class="feature-card" (click)="currentView = 'form'">
+                <div class="icon-holder icon-primary">
+                    <i class="fas fa-file-medical"></i>
+                </div>
+                <h3>Send Details to Doctor</h3>
+                <p>Submit your symptoms or request an appointment.</p>
+                <button class="select-btn primary-bg">Access Form</button>
+            </div>
+
+            <div class="feature-card" (click)="currentView = 'prescriptions'">
+                <div class="icon-holder icon-secondary">
+                    <i class="fas fa-prescription-bottle-alt"></i>
+                </div>
+                <h3>My Prescriptions</h3>
+                <p>View your medical prescriptions and history.</p>
+                <button class="select-btn secondary-bg">View Prescriptions</button>
+            </div>
+
+            <div class="feature-card" (click)="currentView = 'reminders'">
+                <div class="icon-holder icon-tertiary">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <h3>Medication Reminders</h3>
+                <p>Set and manage your daily medication schedule.</p>
+                <button class="select-btn tertiary-bg">Set Reminders</button>
+            </div>
+            
         </div>
+    </ng-container>
 
-        <div class="form-group">
-            <label for="age">Age</label>
-            <input id="age" name="age" type="number" ngModel required placeholder="Enter your age" />
-        </div>
+    <ng-container *ngIf="currentView === 'form'">
+        <button class="back-to-menu-btn" (click)="currentView = 'menu'">
+            &leftarrow; Back to Menu
+        </button>
+        <form #patientForm="ngForm" (ngSubmit)="onSubmit(patientForm)">
+            <div class="form-group">
+                <label for="name">Patient Name</label>
+                <input id="name" name="name" type="text" ngModel required placeholder="Enter your full name" />
+            </div>
 
-        <div class="form-group">
-            <label for="disease">Disease Type</label>
-            <select id="disease" name="disease" ngModel required>
-                <option value="" disabled selected>Select disease / specialist</option>
-                <option value="Cardiologist">Cardiologist</option>
-                <option value="Dermatologist">Dermatologist</option>
-                <option value="Gastroenterologist">Gastroenterologist</option>
-                <option value="Neurologist">Neurologist</option>
-                <option value="Pediatrician">Pediatrician</option>
-                <option value="General">General</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label for="age">Age</label>
+                <input id="age" name="age" type="number" ngModel required placeholder="Enter your age" />
+            </div>
 
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" ngModel rows="4" required
-                placeholder="Describe your condition or symptoms..."></textarea>
-        </div>
+            <div class="form-group">
+                <label for="disease">Disease Type</label>
+                <select id="disease" name="disease" ngModel required>
+                    <option value="" disabled selected>Select disease / specialist</option>
+                    <option value="Cardiologist">Cardiologist</option>
+                    <option value="Dermatologist">Dermatologist</option>
+                    <option value="Gastroenterologist">Gastroenterologist</option>
+                    <option value="Neurologist">Neurologist</option>
+                    <option value="Pediatrician">Pediatrician</option>
+                    <option value="General">General</option>
+                </select>
+            </div>
 
-        <button type="submit">Send Details</button>
-    </form>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" ngModel rows="4" required
+                    placeholder="Describe your condition or symptoms..."></textarea>
+            </div>
 
-    <hr />
+            <button type="submit">Send Details</button>
+        </form>
+    </ng-container>
 
-    <!-- ✅ My Prescriptions Section -->
-    <div class="prescriptions-container">
-        <h3>💊 My Prescriptions</h3>
+    <ng-container *ngIf="currentView === 'prescriptions'">
+        <button class="back-to-menu-btn" (click)="currentView = 'menu'">
+            &leftarrow; Back to Menu
+        </button>
+        <div class="prescriptions-container">
+            <h3>💊 My Prescriptions</h3>
+            
+            <div *ngIf="isLoading">
+                <p>Loading prescriptions...</p>
+            </div>
 
-        <div *ngIf="isLoading">
-            <p>Loading prescriptions...</p>
-        </div>
+            <div *ngIf="!isLoading && prescriptions.length === 0">
+                <p>No prescriptions yet.</p>
+            </div>
 
-        <div *ngIf="!isLoading && prescriptions.length === 0">
-            <p>No prescriptions yet.</p>
-        </div>
-
-        <div *ngIf="!isLoading && prescriptions.length > 0" class="prescription-list">
-            <div *ngFor="let p of prescriptions" class="prescription-card">
-                <h4>
-                    Dr. {{ p.doctor?.username }}
-                    <span *ngIf="p.doctor?.specialization">({{ p.doctor.specialization }})</span>
-                </h4>
-                <p><strong>Diagnosis:</strong> {{ p.diagnosis }}</p>
-                <p><strong>Medication:</strong> {{ p.medication }}</p>
-                <p><small><strong>Issued At:</strong> {{ p.issuedAt | date:'medium' }}</small></p>
+            <div *ngIf="!isLoading && prescriptions.length > 0" class="prescription-list">
+                <div *ngFor="let p of prescriptions" class="prescription-card">
+                    <h4>
+                        Dr. {{ p.doctor?.username }}
+                        <span *ngIf="p.doctor?.specialization">({{ p.doctor.specialization }})</span>
+                    </h4>
+                    <p><strong>Diagnosis:</strong> {{ p.diagnosis }}</p>
+                    <p><strong>Medication:</strong> {{ p.medication }}</p>
+                    <p><small><strong>Issued At:</strong> {{ p.issuedAt | date:'medium' }}</small></p>
+                </div>
             </div>
         </div>
-    </div>
-    <div>
+    </ng-container>
+
+    <ng-container *ngIf="currentView === 'reminders'">
+        <button class="back-to-menu-btn" (click)="currentView = 'menu'">
+            &leftarrow; Back to Menu
+        </button>
         <app-today-reminders></app-today-reminders>
-    </div>
-    
-    <button class="logout-btn" (click)="logout()">Logout</button>
+    </ng-container>
+
 </div>

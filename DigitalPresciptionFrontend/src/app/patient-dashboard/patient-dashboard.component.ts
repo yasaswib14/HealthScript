@@ -3,8 +3,9 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router'; // ✅ Added import
-import { TodayRemindersComponent } from '../medication-reminder/today-reminders/today-reminders.component'; // <-- IMPORT IT
+import { Router } from '@angular/router';
+import { TodayRemindersComponent } from '../medication-reminder/today-reminders/today-reminders.component';
+
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
@@ -16,7 +17,10 @@ export class PatientDashboardComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
-  private router = inject(Router); // ✅ Inject router
+  private router = inject(Router);
+
+  // Initialized to 'menu' to show the three feature cards
+  currentView: 'menu' | 'form' | 'prescriptions' | 'reminders' = 'menu'; 
 
   prescriptions: any[] = [];
   isLoading: boolean = false;
@@ -35,7 +39,8 @@ export class PatientDashboardComponent implements OnInit {
     const token = localStorage.getItem('jwtToken');
     if (token) {
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-      this.loadPrescriptions(headers);
+      // Load prescriptions data even if we start on the 'menu' view
+      this.loadPrescriptions(headers); 
     }
   }
 
@@ -90,6 +95,8 @@ export class PatientDashboardComponent implements OnInit {
           this.safeAlert(res);
           form.reset();
           this.loadPrescriptions(headers);
+          // Switch back to menu after submission
+          this.currentView = 'menu'; 
         },
         error: (err) => {
           console.error('❌ Error submitting form:', err);
@@ -98,7 +105,6 @@ export class PatientDashboardComponent implements OnInit {
       });
   }
 
-  // ✅ Logout method
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('jwtToken');
