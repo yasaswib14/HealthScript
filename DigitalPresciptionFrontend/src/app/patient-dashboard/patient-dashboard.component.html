@@ -1,13 +1,18 @@
 <div class="dashboard-container">
     <h2>Welcome, Patient!</h2>
+
     <div class="header-user-info">
         <span>Welcome, Yass</span>
-        <button class="logout-btn" (click)="logout()">Logout</button>
+
+        <!-- ✅ Logout button visible only on the main dashboard view -->
+        <button *ngIf="currentView === 'menu'" class="logout-btn" (click)="logout()">
+            Logout
+        </button>
     </div>
 
+    <!-- ✅ Dashboard Home (Main Menu) -->
     <ng-container *ngIf="currentView === 'menu'">
         <div class="feature-cards-container">
-            
             <div class="feature-card" (click)="currentView = 'form'">
                 <div class="icon-holder icon-primary">
                     <i class="fas fa-file-medical"></i>
@@ -34,10 +39,10 @@
                 <p>Set and manage your daily medication schedule.</p>
                 <button class="select-btn tertiary-bg">Set Reminders</button>
             </div>
-            
         </div>
     </ng-container>
 
+    <!-- ✅ Form Section -->
     <ng-container *ngIf="currentView === 'form'">
         <button class="back-to-menu-btn" (click)="currentView = 'menu'">
             &leftarrow; Back to Menu
@@ -50,17 +55,8 @@
 
             <div class="form-group">
                 <label for="age">Age</label>
-                <input
-        id="age"
-        name="age"
-        type="number"
-        ngModel
-        required
-        placeholder="Enter your age"
-        #ageInput="ngModel"
-       
-        (input)="onAgeChange(ageInput.value, patientForm)"
-    />
+                <input id="age" name="age" type="number" ngModel required placeholder="Enter your age"
+                    #ageInput="ngModel" (input)="onAgeChange(ageInput.value, patientForm)" />
             </div>
 
             <div class="form-group">
@@ -73,16 +69,16 @@
                     <option value="Neurologist">Neurologist</option>
                     <option value="Pediatrician">Pediatrician</option>
                     <option value="General">General</option>
-                    </select>
+                </select>
             </div>
- 
+
             <div class="form-group">
-        <label for="severity">Severity Level</label>
-        <select id="severity" name="severity" ngModel required>
-        <option value="" disabled selected>Select severity level</option>
-        <option value="LOW">Low (Routine Check)</option>
-        <option value="MEDIUM">Medium (Needs attention)</option>
-        <option value="HIGH">High (Urgent)</option>
+                <label for="severity">Severity Level</label>
+                <select id="severity" name="severity" ngModel required>
+                    <option value="" disabled selected>Select severity level</option>
+                    <option value="LOW">Low (Routine Check)</option>
+                    <option value="MEDIUM">Medium (Needs attention)</option>
+                    <option value="HIGH">High (Urgent)</option>
                 </select>
             </div>
 
@@ -96,13 +92,14 @@
         </form>
     </ng-container>
 
+    <!-- ✅ Prescriptions Section -->
     <ng-container *ngIf="currentView === 'prescriptions'">
         <button class="back-to-menu-btn" (click)="currentView = 'menu'">
             &leftarrow; Back to Menu
         </button>
         <div class="prescriptions-container">
             <h3>💊 My Prescriptions</h3>
-            
+
             <div *ngIf="isLoading">
                 <p>Loading prescriptions...</p>
             </div>
@@ -119,17 +116,17 @@
                     </h4>
                     <p><strong>Diagnosis:</strong> {{ p.diagnosis }}</p>
                     <p><strong>Medication:</strong> {{ p.medication }}</p>
-                    <p><small><strong>Issued At:</strong> {{ p.issuedAt | date:'medium' }}</small></p>
+                    <p><small><strong>Issued At:</strong> {{ p.issuedAt | date: 'medium' }}</small></p>
                 </div>
             </div>
         </div>
     </ng-container>
 
+    <!-- ✅ Reminders Section -->
     <ng-container *ngIf="currentView === 'reminders'">
         <button class="back-to-menu-btn" (click)="currentView = 'menu'">
             &leftarrow; Back to Menu
         </button>
         <app-today-reminders></app-today-reminders>
     </ng-container>
-
 </div>
