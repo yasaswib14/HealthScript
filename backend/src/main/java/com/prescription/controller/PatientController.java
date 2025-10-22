@@ -72,6 +72,7 @@ public class PatientController {
             message.setReceiver(receiver);
             message.setContent(dto.getContent());
             message.setTimestamp(LocalDateTime.now());
+            message.setSeverity(dto.getSeverity());
             sentMessages.add(messageRepository.save(message));
         }
 
@@ -109,7 +110,8 @@ public class PatientController {
     public static class MessageDto {
         private String diseaseType;
         private String content;
-
+        private String severity;
+ 
         public String getDiseaseType() {
             return diseaseType;
         }
@@ -124,6 +126,13 @@ public class PatientController {
 
         public void setContent(String content) {
             this.content = content;
+        }
+        public String getSeverity() {
+            return severity;
+        }
+ 
+        public void setSeverity(String severity) {
+            this.severity = severity;
         }
     }
 }

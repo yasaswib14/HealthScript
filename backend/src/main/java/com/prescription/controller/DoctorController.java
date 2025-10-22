@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Comparator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,7 +60,32 @@ public class DoctorController {
 
         List<Message> messages = messageRepository.findByReceiver_Id(doctor.getId());
         System.out.println("DEBUG >>> Messages found: " + messages.size());
-
+        messages.sort(Comparator
+            .comparing((Message m) -> {
+                String severity = m.getSeverity() != null ? m.getSeverity().toUpperCase() : "LOW";
+               
+                int priority;
+               
+                // --- Replaced switch expression with traditional switch statement ---
+                switch (severity) {
+                    case "HIGH":
+                        priority = 3;
+                        break;
+                    case "MEDIUM":
+                        priority = 2;
+                        break;
+                    default: // LOW or null
+                        priority = 1;
+                        break;
+                }
+                // ------------------------------------------------------------------
+               
+                return priority;
+            })
+            .reversed() // Sort descending (3, 2, 1)
+            .thenComparing(Message::getTimestamp) // Then sort by timestamp for secondary ordering
+        );
+ 
         return ResponseEntity.ok(messages);
     }
 

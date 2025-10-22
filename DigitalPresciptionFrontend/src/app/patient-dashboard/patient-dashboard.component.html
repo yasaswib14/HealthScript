@@ -50,7 +50,17 @@
 
             <div class="form-group">
                 <label for="age">Age</label>
-                <input id="age" name="age" type="number" ngModel required placeholder="Enter your age" />
+                <input
+        id="age"
+        name="age"
+        type="number"
+        ngModel
+        required
+        placeholder="Enter your age"
+        #ageInput="ngModel"
+       
+        (input)="onAgeChange(ageInput.value, patientForm)"
+    />
             </div>
 
             <div class="form-group">
@@ -63,6 +73,16 @@
                     <option value="Neurologist">Neurologist</option>
                     <option value="Pediatrician">Pediatrician</option>
                     <option value="General">General</option>
+                    </select>
+            </div>
+ 
+            <div class="form-group">
+        <label for="severity">Severity Level</label>
+        <select id="severity" name="severity" ngModel required>
+        <option value="" disabled selected>Select severity level</option>
+        <option value="LOW">Low (Routine Check)</option>
+        <option value="MEDIUM">Medium (Needs attention)</option>
+        <option value="HIGH">High (Urgent)</option>
                 </select>
             </div>
 

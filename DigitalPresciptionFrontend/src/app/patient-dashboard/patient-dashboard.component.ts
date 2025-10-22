@@ -24,6 +24,7 @@ export class PatientDashboardComponent implements OnInit {
 
   prescriptions: any[] = [];
   isLoading: boolean = false;
+  selectedSpecialist: string = '';
 
   private safeAlert(message: string): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -61,7 +62,35 @@ export class PatientDashboardComponent implements OnInit {
         }
       });
   }
-
+onAgeChange(age: string, form: NgForm): void {
+        const ageValue = parseInt(age, 10);
+        const diseaseControl = form.controls['disease'];
+ 
+        if (!diseaseControl) return;
+ 
+        // Use setTimeout to ensure the form model is fully updated before we manipulate it.
+        setTimeout(() => {
+            // 1. Check for age less than 10
+            if (!Number.isNaN(ageValue) && ageValue > 0 && ageValue < 10) {
+               
+                if (diseaseControl.value !== 'Pediatrician') {
+                    // Force set the value
+                    diseaseControl.setValue('Pediatrician');
+                    this.cdr.detectChanges();
+                }
+               
+            } else if (ageValue >= 10 || Number.isNaN(ageValue)) {
+               
+                // 2. If age is 10 or more, or cleared, and it was auto-selected, reset it.
+                if (diseaseControl.value === 'Pediatrician') {
+                    // Reset the selection
+                    diseaseControl.setValue('');
+                    this.cdr.detectChanges();
+                }
+            }
+        }, 0); // Zero timeout guarantees immediate execution after current cycle
+    }
+ 
   onSubmit(form: NgForm): void {
     if (!form.valid) {
       this.safeAlert('⚠️ Please fill out all required fields.');
@@ -80,7 +109,8 @@ export class PatientDashboardComponent implements OnInit {
 
     const payload = {
       diseaseType: form.value.disease,
-      content: form.value.description
+      content: form.value.description,
+      severity: form.value.severity
     };
 
     const headers = new HttpHeaders({
