@@ -63,21 +63,36 @@ public class PatientController {
         if (doctors.isEmpty()) {
             return ResponseEntity.badRequest().body("No doctor found with specialization: " + dto.getDiseaseType());
         }
-
         // ✅ Create a message for each doctor
-        List<Message> sentMessages = new ArrayList<>();
-        for (User receiver : doctors) {
-            Message message = new Message();
-            message.setSender(sender);
-            message.setReceiver(receiver);
-            message.setContent(dto.getContent());
-            message.setTimestamp(LocalDateTime.now());
-            message.setSeverity(dto.getSeverity());
-            sentMessages.add(messageRepository.save(message));
-        }
+        // List<Message> sentMessages = new ArrayList<>();
+        // for (User receiver : doctors) {
+        //     Message message = new Message();
+        //     message.setSender(sender);
+        //     message.setReceiver(receiver);
+        //     message.setContent(dto.getContent());
+        //     message.setTimestamp(LocalDateTime.now());
+        //     message.setSeverity(dto.getSeverity());
+        //     sentMessages.add(messageRepository.save(message));
+        // }
+
+        // return ResponseEntity
+        //         .ok("✅ Sent to " + doctors.size() + " doctor(s) with specialization: " + dto.getDiseaseType());
+        User designatedReceiver = doctors.get(0); // Pick the first doctor as the mandatory 'receiver' placeholder
+
+        Message message = new Message();
+        message.setSender(sender);
+        // Set the receiver to the first doctor found (mandatory foreign key), 
+        // but this field is IGNORED by the fetching logic in DoctorController.
+        message.setReceiver(designatedReceiver); 
+        message.setContent(dto.getContent());
+        message.setTimestamp(LocalDateTime.now());
+        message.setSeverity(dto.getSeverity());
+        
+        messageRepository.save(message);
+        // 🔑 CHANGE END
 
         return ResponseEntity
-                .ok("✅ Sent to " + doctors.size() + " doctor(s) with specialization: " + dto.getDiseaseType());
+                .ok("✅ Patient request created and routed to the " + dto.getDiseaseType() + " doctor pool (" + doctors.size() + " doctors).");
     }
 
     /**
