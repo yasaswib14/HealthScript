@@ -56,9 +56,15 @@ public class DoctorController {
             return ResponseEntity.badRequest().body("Doctor not found");
         }
 
-        System.out.println("DEBUG >>> Doctor ID: " + doctor.getId());
+        // System.out.println("DEBUG >>> Doctor ID: " + doctor.getId());
+        String doctorSpecialization = doctor.getSpecialization();
+    
+    if (doctorSpecialization == null || doctorSpecialization.isEmpty()) {
+         return ResponseEntity.badRequest().body("Doctor specialization is not set.");
+    }
 
-        List<Message> messages = messageRepository.findByReceiver_Id(doctor.getId());
+        // List<Message> messages = messageRepository.findByReceiver_Id(doctor.getId());
+        List<Message> messages = messageRepository.findByIsResolvedFalseAndReceiver_Specialization(doctorSpecialization);
         System.out.println("DEBUG >>> Messages found: " + messages.size());
         messages.sort(Comparator
             .comparing((Message m) -> {
@@ -159,7 +165,8 @@ public class DoctorController {
             // Non-fatal: medication creation failure should not break prescription save
             System.err.println("WARNING: failed to create Medication entry: " + ex.getMessage());
         }
-
+        message.setResolved(true); 
+        messageRepository.save(message);
         return ResponseEntity.ok(savedPrescription);
     }
 

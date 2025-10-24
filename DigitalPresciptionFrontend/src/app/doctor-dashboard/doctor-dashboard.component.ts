@@ -17,6 +17,10 @@ export class DoctorDashboardComponent implements OnInit {
     messages: any[] = [];
     isLoading: boolean = true;
 
+    showSuccess: boolean = false;
+    showError: boolean = false;
+    messageText: string = '';
+
     constructor(
         private http: HttpClient,
         private router: Router,
@@ -55,6 +59,8 @@ export class DoctorDashboardComponent implements OnInit {
             this.fetchMessages(headers);
         }, 300);
     }
+
+    
 
     private fetchMessages(headers: HttpHeaders) {
         this.isLoading = true;
@@ -118,6 +124,8 @@ export class DoctorDashboardComponent implements OnInit {
                 next: () => {
                     alert('✅ Prescription sent successfully!');
                     form.reset();
+
+                    this.messages = this.messages.filter(msg => msg.id !== messageId);
                     // optionally refresh messages to reflect state
                     const authToken = localStorage.getItem('jwtToken') || '';
                     const hdrs = new HttpHeaders({ 'Authorization': `Bearer ${authToken}` });
