@@ -21,16 +21,19 @@
     <div class="loader"></div>
 </div>
 
-<!-- ✅ Show messages once loaded -->
-<div *ngIf="!isLoading && messages && messages.length > 0">
-    <div *ngFor="let msg of messages" class="message-card" [ngClass]="{'severity-high': msg.severity === 'HIGH'}">
-        <div class="message-header">
-            <strong>From:</strong> {{ msg.sender?.username }}
-            <span class="severity-tag"
-                [ngClass]="{'high': msg.severity === 'HIGH', 'medium': msg.severity === 'MEDIUM', 'low': msg.severity === 'LOW'}">
-                {{ msg.severity || 'LOW' }}
-            </span>
-        </div>
+    <!-- ✅ Messages -->
+    <div *ngIf="!isLoading && messages && messages.length > 0">
+        <div *ngFor="let msg of messages" class="message-card" [ngClass]="{ 'severity-high': msg.severity === 'HIGH' }">
+            <div class="message-header">
+                <strong>From:</strong> {{ msg.sender?.username }}
+                <span class="severity-tag" [ngClass]="{
+            high: msg.severity === 'HIGH',
+            medium: msg.severity === 'MEDIUM',
+            low: msg.severity === 'LOW'
+          }">
+                    {{ msg.severity || 'LOW' }}
+                </span>
+            </div>
 
         <div class="message-body">
             <p><strong>Message:</strong> {{ msg.content }}</p>

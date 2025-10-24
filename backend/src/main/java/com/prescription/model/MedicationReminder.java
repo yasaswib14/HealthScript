@@ -20,6 +20,16 @@ public class MedicationReminder {
     @JoinColumn(name = "patient_id")
     private User patient;
 
+    // Existing fields
     private LocalDate date;
     private boolean taken;
+
+    // ✅ NEW FIELD: Represents which "day" in the medication course this reminder
+    // belongs to (e.g., 1, 2, 3...)
+    private int dayNumber;
+
+    // Convenience method (optional)
+    public boolean isForToday() {
+        return date != null && date.equals(LocalDate.now());
+    }
 }
