@@ -1,17 +1,22 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { PatientDashboard } from './patient-dashboard';
-describe('PatientDashboard', () => {
-  let component: PatientDashboard;
-  let fixture: ComponentFixture<PatientDashboard>;
+
+import { TodayReminders } from './today-reminders';
+
+describe('TodayReminders', () => {
+  let component: TodayReminders;
+  let fixture: ComponentFixture<TodayReminders>;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PatientDashboard]
+      imports: [TodayReminders]
     })
     .compileComponents();
-    fixture = TestBed.createComponent(PatientDashboard);
+
+    fixture = TestBed.createComponent(TodayReminders);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });

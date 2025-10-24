@@ -3,12 +3,13 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders, HttpClientModule } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
-import { Router } from '@angular/router'; // ✅ Added import
+import { Router } from '@angular/router';
+import { TodayRemindersComponent } from '../medication-reminder/today-reminders/today-reminders.component';
 
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [FormsModule, CommonModule, HttpClientModule],
+  imports: [FormsModule, CommonModule, HttpClientModule, TodayRemindersComponent],
   templateUrl: './patient-dashboard.component.html',
   styleUrls: ['./patient-dashboard.component.css']
 })
@@ -16,10 +17,14 @@ export class PatientDashboardComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
-  private router = inject(Router); // ✅ Inject router
+  private router = inject(Router);
+
+  // Initialized to 'menu' to show the three feature cards
+  currentView: 'menu' | 'form' | 'prescriptions' | 'reminders' = 'menu'; 
 
   prescriptions: any[] = [];
   isLoading: boolean = false;
+  selectedSpecialist: string = '';
 
   private safeAlert(message: string): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -35,7 +40,8 @@ export class PatientDashboardComponent implements OnInit {
     const token = localStorage.getItem('jwtToken');
     if (token) {
       const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-      this.loadPrescriptions(headers);
+      // Load prescriptions data even if we start on the 'menu' view
+      this.loadPrescriptions(headers); 
     }
   }
 
@@ -56,7 +62,35 @@ export class PatientDashboardComponent implements OnInit {
         }
       });
   }
-
+onAgeChange(age: string, form: NgForm): void {
+        const ageValue = parseInt(age, 10);
+        const diseaseControl = form.controls['disease'];
+ 
+        if (!diseaseControl) return;
+ 
+        // Use setTimeout to ensure the form model is fully updated before we manipulate it.
+        setTimeout(() => {
+            // 1. Check for age less than 10
+            if (!Number.isNaN(ageValue) && ageValue > 0 && ageValue < 10) {
+               
+                if (diseaseControl.value !== 'Pediatrician') {
+                    // Force set the value
+                    diseaseControl.setValue('Pediatrician');
+                    this.cdr.detectChanges();
+                }
+               
+            } else if (ageValue >= 10 || Number.isNaN(ageValue)) {
+               
+                // 2. If age is 10 or more, or cleared, and it was auto-selected, reset it.
+                if (diseaseControl.value === 'Pediatrician') {
+                    // Reset the selection
+                    diseaseControl.setValue('');
+                    this.cdr.detectChanges();
+                }
+            }
+        }, 0); // Zero timeout guarantees immediate execution after current cycle
+    }
+ 
   onSubmit(form: NgForm): void {
     if (!form.valid) {
       this.safeAlert('⚠️ Please fill out all required fields.');
@@ -75,7 +109,8 @@ export class PatientDashboardComponent implements OnInit {
 
     const payload = {
       diseaseType: form.value.disease,
-      content: form.value.description
+      content: form.value.description,
+      severity: form.value.severity
     };
 
     const headers = new HttpHeaders({
@@ -90,6 +125,8 @@ export class PatientDashboardComponent implements OnInit {
           this.safeAlert(res);
           form.reset();
           this.loadPrescriptions(headers);
+          // Switch back to menu after submission
+          this.currentView = 'menu'; 
         },
         error: (err) => {
           console.error('❌ Error submitting form:', err);
@@ -98,7 +135,6 @@ export class PatientDashboardComponent implements OnInit {
       });
   }
 
-  // ✅ Logout method
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('jwtToken');

@@ -17,6 +17,10 @@ export class DoctorDashboardComponent implements OnInit {
     messages: any[] = [];
     isLoading: boolean = true;
 
+    showSuccess: boolean = false;
+    showError: boolean = false;
+    messageText: string = '';
+
     constructor(
         private http: HttpClient,
         private router: Router,
@@ -56,6 +60,8 @@ export class DoctorDashboardComponent implements OnInit {
         }, 300);
     }
 
+    
+
     private fetchMessages(headers: HttpHeaders) {
         this.isLoading = true;
 
@@ -63,7 +69,12 @@ export class DoctorDashboardComponent implements OnInit {
             .subscribe({
                 next: (data: any) => {
                     console.log('✅ Messages received from backend:', data);
-                    this.messages = data || [];
+                    const severityOrder: { [key: string]: number } = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+                    this.messages = (data || []).sort((a: any, b: any) => {
+                        const sevA = severityOrder[a.severity] || 0;
+                        const sevB = severityOrder[b.severity] || 0;
+                        return sevB - sevA; // Descending order (HIGH first)
+                    });
                     this.isLoading = false;
 
                     // ✅ Force UI repaint for hydration-safe change detection
@@ -113,6 +124,8 @@ export class DoctorDashboardComponent implements OnInit {
                 next: () => {
                     alert('✅ Prescription sent successfully!');
                     form.reset();
+
+                    this.messages = this.messages.filter(msg => msg.id !== messageId);
                     // optionally refresh messages to reflect state
                     const authToken = localStorage.getItem('jwtToken') || '';
                     const hdrs = new HttpHeaders({ 'Authorization': `Bearer ${authToken}` });

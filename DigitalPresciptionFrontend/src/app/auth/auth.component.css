@@ -265,3 +265,52 @@ select:focus {
         text-align: center;
     }
 }
+
+/* blur effect on the main auth content */
+.auth-root.blurred {
+  filter: blur(6px) saturate(0.95);
+  pointer-events: none;
+  user-select: none;
+  transition: filter 180ms ease;
+  touch-action: none;
+}
+
+/* overlay */
+.redirect-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 10, 20, 0.45);
+  z-index: 9999;
+}
+
+/* white card with message */
+.overlay-content {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  background: #fff;
+  padding: 18px 22px;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(2,6,23,0.12);
+  font-weight: 700;
+  color: #0b1220;
+}
+
+/* small spinner */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.12);
+  border-top-color: #0066ff;
+  animation: spin 800ms linear infinite;
+}
+
+.redirect-text { font-size: 15px; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

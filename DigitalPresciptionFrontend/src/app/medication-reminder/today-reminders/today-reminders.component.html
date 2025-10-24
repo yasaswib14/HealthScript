@@ -1,0 +1,50 @@
+<div class="card p-6 bg-white shadow-lg rounded-xl">
+  <h3 class="text-2xl font-semibold text-indigo-700 mb-4 border-b pb-2">Daily Medication Schedule</h3>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-8">
+    <p class="text-gray-500">Loading today's reminders...</p>
+    <div class="spinner mt-3"></div> <!-- Placeholder for a CSS spinner if you have one -->
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+    <p class="font-bold">Error:</p>
+    <p>{{ errorMessage }}</p>
+    <button (click)="loadReminders()" class="mt-2 text-sm font-semibold text-red-800 underline">Try Again</button>
+  </div>
+
+  <!-- List of Reminders -->
+  <!-- CRITICAL FIX: Ensure the <ul> is here and the *ngFor is on the <li> -->
+  <ul *ngIf="!loading && reminders.length > 0" class="space-y-4">
+    <li *ngFor="let reminder of reminders" 
+        [ngClass]="{'bg-green-50 border-green-300': reminder.taken, 'bg-yellow-50 border-yellow-300': !reminder.taken}"
+        class="flex justify-between items-center p-3 border rounded-lg transition duration-150">
+      
+      <div class="med-details flex-grow">
+        <strong class="text-lg">{{ reminder.medication.medicationName }}</strong>
+        <p class="text-sm text-gray-500">Dose: {{ reminder.medication.dosageTiming }}</p>
+      </div>
+
+      <div class="med-status flex items-center space-x-3">
+        <span class="font-medium" [ngClass]="{'text-green-600': reminder.taken, 'text-yellow-600': !reminder.taken}">
+          {{ reminder.taken ? '✅ Taken' : '⏳ Pending' }}
+        </span>
+        
+        <button
+          (click)="markAsTaken(reminder)"
+          [disabled]="reminder.taken"
+          [ngClass]="{'bg-gray-300 cursor-not-allowed': reminder.taken, 'bg-indigo-600 hover:bg-indigo-700 text-white': !reminder.taken}"
+          class="px-3 py-1 text-sm rounded-lg transition duration-150 shadow-md"
+        >
+          {{ reminder.taken ? 'Completed' : 'Mark Taken' }}
+        </button>
+      </div>
+    </li>
+  </ul>
+
+  <!-- No Reminders State -->
+  <div *ngIf="!loading && reminders.length === 0 && !errorMessage" class="text-center py-8 bg-gray-50 rounded-lg">
+    <p class="text-gray-600 font-medium">🎉 All clear! No outstanding reminders for today.</p>
+  </div>
+</div>
