@@ -126,40 +126,36 @@ public class DoctorController {
             return ResponseEntity.badRequest().body("Doctor not found");
         }
 
-        // create and save prescription
+        // Create and save prescription
         Prescription prescription = new Prescription();
         prescription.setDoctor(doctor);
         prescription.setPatient(message.getSender());
-        // If your Prescription entity has a message field comment/uncomment as needed:
-        // prescription.setMessage(message);
         prescription.setDiagnosis(request.getDiagnosis());
-        prescription.setMedication(request.getMedication());
         prescription.setIssuedAt(LocalDateTime.now());
 
+        // Save prescription first
         Prescription savedPrescription = prescriptionRepository.save(prescription);
 
-        // Create and save Medication record for reminders (if medication info provided)
+        // Process each medication in the request
         try {
-            String medName = request.getMedication();
-            String dosageTiming = request.getDosageTiming(); // may be null
-            int durationDays = request.getDurationDays() <= 0 ? 0 : request.getDurationDays();
+            if (request.getMedications() != null && !request.getMedications().isEmpty()) {
+                for (MedicationRequest medRequest : request.getMedications()) {
+                    if (medRequest.getMedicationName() != null && !medRequest.getMedicationName().trim().isEmpty()) {
+                        Medication med = new Medication();
+                        med.setPrescription(savedPrescription);
+                        med.setPatient(message.getSender());
+                        med.setMedicationName(medRequest.getMedicationName());
+                        med.setDosageTiming(medRequest.getDosageTiming());
+                        med.setDurationDays(medRequest.getDurationDays());
+                        
+                        LocalDate start = medRequest.getStartDate() != null ? 
+                            medRequest.getStartDate() : LocalDate.now();
+                        med.setStartDate(start);
+                        med.setEndDate(start.plusDays(medRequest.getDurationDays()));
 
-            // Only create Medication entity if medication name provided
-            if (medName != null && !medName.trim().isEmpty()) {
-                Medication med = new Medication();
-                med.setPrescription(savedPrescription);
-                med.setPatient(message.getSender());
-                med.setMedicationName(medName);
-                med.setDosageTiming(dosageTiming != null ? dosageTiming : "");
-                med.setDurationDays(durationDays);
-
-                LocalDate start = LocalDate.now();
-                med.setStartDate(start);
-                // If durationDays is zero or negative, we can set endDate = start (single day)
-                // or null.
-                med.setEndDate(durationDays > 0 ? start.plusDays(durationDays) : start);
-
-                medicationRepository.save(med);
+                        medicationRepository.save(med);
+                    }
+                }
             }
         } catch (Exception ex) {
             // Non-fatal: medication creation failure should not break prescription save
@@ -170,12 +166,10 @@ public class DoctorController {
         return ResponseEntity.ok(savedPrescription);
     }
 
-    // ✅ DTO for prescription (extended)
+    // ✅ DTO for prescription with multiple medications
     public static class PrescriptionRequest {
         private String diagnosis;
-        private String medication;
-        private String dosageTiming; // optional, e.g. "Morning, Night"
-        private int durationDays; // optional
+        private List<MedicationRequest> medications;
 
         public String getDiagnosis() {
             return diagnosis;
@@ -185,12 +179,27 @@ public class DoctorController {
             this.diagnosis = diagnosis;
         }
 
-        public String getMedication() {
-            return medication;
+        public List<MedicationRequest> getMedications() {
+            return medications;
         }
 
-        public void setMedication(String medication) {
-            this.medication = medication;
+        public void setMedications(List<MedicationRequest> medications) {
+            this.medications = medications;
+        }
+    }
+
+    public static class MedicationRequest {
+        private String medicationName;
+        private String dosageTiming;
+        private int durationDays;
+        private LocalDate startDate;
+
+        public String getMedicationName() {
+            return medicationName;
+        }
+
+        public void setMedicationName(String medicationName) {
+            this.medicationName = medicationName;
         }
 
         public String getDosageTiming() {
@@ -207,6 +216,14 @@ public class DoctorController {
 
         public void setDurationDays(int durationDays) {
             this.durationDays = durationDays;
+        }
+
+        public LocalDate getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(LocalDate startDate) {
+            this.startDate = startDate;
         }
     }
 }

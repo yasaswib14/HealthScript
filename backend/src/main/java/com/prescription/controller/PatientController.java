@@ -3,6 +3,7 @@ package com.prescription.controller;
 import com.prescription.model.Message;
 import com.prescription.model.User;
 import com.prescription.model.Prescription;
+import com.prescription.model.Medication;
 import com.prescription.repository.MessageRepository;
 import com.prescription.repository.UserRepository;
 import com.prescription.repository.PrescriptionRepository;
@@ -11,9 +12,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.List;
 import java.util.ArrayList;
@@ -99,7 +102,8 @@ public class PatientController {
      * ✅ Fetch prescriptions created by doctors for this patient.
      */
     @GetMapping("/prescriptions")
-    public ResponseEntity<List<Prescription>> getPrescriptionsForPatient(Authentication authentication) {
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<PrescriptionDTO>> getPrescriptionsForPatient(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(401).build();
         }
@@ -109,7 +113,62 @@ public class PatientController {
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         List<Prescription> prescriptions = prescriptionRepository.findByPatient(patient);
-        return ResponseEntity.ok(prescriptions);
+        List<PrescriptionDTO> prescriptionDTOs = prescriptions.stream()
+                .map(p -> new PrescriptionDTO(p))
+                .toList();
+        return ResponseEntity.ok(prescriptionDTOs);
+    }
+
+    // DTO to avoid circular references in JSON serialization
+    public static class PrescriptionDTO {
+        private Long id;
+        private String doctorName;
+        private String diagnosis;
+        private LocalDateTime issuedAt;
+        private List<MedicationDTO> medications;
+
+        public PrescriptionDTO(Prescription prescription) {
+            this.id = prescription.getId();
+            this.doctorName = prescription.getDoctor().getUsername();
+            this.diagnosis = prescription.getDiagnosis();
+            this.issuedAt = prescription.getIssuedAt();
+            this.medications = prescription.getMedications().stream()
+                .map(m -> new MedicationDTO(m))
+                .toList();
+        }
+
+        // Getters
+        public Long getId() { return id; }
+        public String getDoctorName() { return doctorName; }
+        public String getDiagnosis() { return diagnosis; }
+        public LocalDateTime getIssuedAt() { return issuedAt; }
+        public List<MedicationDTO> getMedications() { return medications; }
+    }
+
+    public static class MedicationDTO {
+        private Long id;
+        private String medicationName;
+        private String dosageTiming;
+        private int durationDays;
+        private LocalDate startDate;
+        private LocalDate endDate;
+
+        public MedicationDTO(Medication medication) {
+            this.id = medication.getId();
+            this.medicationName = medication.getMedicationName();
+            this.dosageTiming = medication.getDosageTiming();
+            this.durationDays = medication.getDurationDays();
+            this.startDate = medication.getStartDate();
+            this.endDate = medication.getEndDate();
+        }
+
+        // Getters
+        public Long getId() { return id; }
+        public String getMedicationName() { return medicationName; }
+        public String getDosageTiming() { return dosageTiming; }
+        public int getDurationDays() { return durationDays; }
+        public LocalDate getStartDate() { return startDate; }
+        public LocalDate getEndDate() { return endDate; }
     }
 
     // ✅ Helper to extract User object from Authentication

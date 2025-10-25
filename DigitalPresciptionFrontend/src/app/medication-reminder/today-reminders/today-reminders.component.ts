@@ -17,6 +17,15 @@ export class TodayRemindersComponent implements OnInit {
   loading = true;
   errorMessage: string | null = null;
   private authHeaders?: HttpHeaders;
+  currentDate = new Date();
+
+  // Status constants for better readability
+  readonly STATUS = {
+    TAKEN: 'taken',
+    MISSED: 'missed',
+    PENDING: 'pending',
+    UPCOMING: 'upcoming'
+  };
 
   constructor(
     private reminderService: MedicationReminderService,
@@ -68,6 +77,246 @@ export class TodayRemindersComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  /**
+   * Get the status of a reminder day
+   */
+  getReminderStatus(day: any): string {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+
+    if (day.taken) {
+      return this.STATUS.TAKEN;
+    }
+    
+    if (dayDate < today) {
+      return this.STATUS.MISSED;
+    }
+    
+    if (dayDate.getTime() === today.getTime()) {
+      return this.STATUS.PENDING;
+    }
+    
+    return this.STATUS.UPCOMING;
+  }
+
+  /**
+   * Calculate the progress percentage for a medication
+   */
+  calculateProgress(medication: any): number {
+    if (!medication.days.length) return 0;
+    const daysUpToToday = medication.days.filter((d: any) => {
+      const dayDate = new Date(d.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      dayDate.setHours(0, 0, 0, 0);
+      return dayDate <= today;
+    });
+
+    if (!daysUpToToday.length) return 0;
+
+    const takenDays = daysUpToToday.filter((d: any) => d.taken).length;
+    return Math.round((takenDays / daysUpToToday.length) * 100);
+  }
+
+  /**
+   * Format a date to a human-readable string
+   */
+  formatDate(date: Date | string): string {
+    const d = new Date(date);
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+
+  /**
+   * Check if a date is today
+   */
+  isToday(date: Date | string): boolean {
+    const d = new Date(date);
+    const today = new Date();
+    return d.getDate() === today.getDate() &&
+           d.getMonth() === today.getMonth() &&
+           d.getFullYear() === today.getFullYear();
+  }
+
+  /**
+   * Calculate remaining days for a medication
+   */
+  getRemainingDays(medication: any): number {
+    const lastDay = medication.days[medication.days.length - 1];
+    if (!lastDay) return 0;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endDate = new Date(lastDay.date);
+    endDate.setHours(0, 0, 0, 0);
+
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
+  }
+
+  /**
+   * Generate an array of days for a medication reminder
+   */
+  /**
+   * Get active (non-taken) days for the medication
+   */
+  getActiveDays(reminder: any): any[] {
+    return this.getAllDays(reminder).filter(day => !day.taken);
+  }
+
+  /**
+   * Get completed (taken) days for the medication
+   */
+  getCompletedDays(reminder: any): any[] {
+    return this.getAllDays(reminder).filter(day => day.taken);
+  }
+
+  /**
+   * Generate an array of all days for a medication reminder
+   */
+  private getAllDays(reminder: any): any[] {
+    const startDate = new Date(reminder.medication.startDate);
+    const days = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+    
+    for (let i = 0; i < reminder.medication.durationDays; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      currentDate.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
+      
+      const day = {
+        dayNumber: i + 1,
+        date: currentDate,
+        taken: false,
+        missed: false,
+        isToday: currentDate.getTime() === today.getTime()
+      };
+
+      // Check if this day has a record
+      const record = reminder.medication.days?.find((d: any) => 
+        this.isSameDay(new Date(d.date), currentDate)
+      );
+
+      // If the medication was taken, mark it as taken
+      if (record && record.taken) {
+        day.taken = true;
+      } else if (!day.taken && currentDate < today) {
+        // Only mark as missed if it's a past date and wasn't taken
+        day.missed = true;
+      }
+
+      days.push(day);
+    }
+    
+    return days;
+  }
+
+  /**
+   * Check if two dates are the same day
+   */
+  private isSameDay(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getDate() === date2.getDate();
+  }
+
+  /**
+   * Get appropriate status text for display
+   */
+  getStatusText(day: any): string {
+    if (day.taken) return 'Taken';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dayDate = new Date(day.date);
+    dayDate.setHours(0, 0, 0, 0);
+
+    if (dayDate < today && !day.taken) return 'Missed';
+    if (day.isToday) return 'Due Today';
+    return 'Upcoming';
+  }
+
+  /**
+   * Check if medication course is completed
+   */
+  isCourseCompleted(reminder: any): boolean {
+    return this.getActiveDays(reminder).length === 0;
+  }
+
+  /**
+   * Check if a reminder is missed
+   */
+  isMissed(reminder: any): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const reminderDate = new Date(reminder.date);
+    reminderDate.setHours(0, 0, 0, 0);
+    return !reminder.taken && reminderDate < today;
+  }
+
+  /**
+   * Get the day number for a reminder
+   */
+  getDayNumber(reminder: any): number {
+    const startDate = new Date(reminder.medication.startDate);
+    const reminderDate = new Date(reminder.date);
+    startDate.setHours(0, 0, 0, 0);
+    reminderDate.setHours(0, 0, 0, 0);
+    const diffTime = reminderDate.getTime() - startDate.getTime();
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  /**
+   * Mark a reminder as taken
+   */
+  markTaken(medicationId: number): void {
+    if (!this.authHeaders) return;
+    
+    this.reminderService.markTaken(medicationId, this.authHeaders).subscribe({
+      next: () => {
+        console.log(`✅ Marked ${medicationId} as taken`);
+        this.loadReminders(); // refresh to stay in sync
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('❌ Failed to mark as taken:', err);
+        alert('Could not update reminder status. Please try again.');
+      }
+    });
+  }
+
+  /**
+   * Calculate progress percentage for a reminder
+   */
+  getProgressPercentage(reminder: any): number {
+    const totalDays = reminder.medication.durationDays;
+    if (!totalDays) return 0;
+
+    const takenDays = reminder.medication.days?.filter((d: any) => d.taken)?.length || 0;
+    return Math.round((takenDays / totalDays) * 100);
+  }
+
+  /**
+   * Get days remaining for a reminder
+   */
+  getDaysRemaining(reminder: any): number {
+    const endDate = new Date(reminder.medication.startDate);
+    endDate.setDate(endDate.getDate() + reminder.medication.durationDays - 1);
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.max(0, diffDays);
   }
 
   /**

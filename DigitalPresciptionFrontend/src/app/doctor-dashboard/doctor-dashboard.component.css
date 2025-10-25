@@ -132,10 +132,171 @@ h2 {
 /* ===== Form Styling ===== */
 .prescription-form {
     margin-top: 20px;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft);
+}
+
+/* Multiple Medications */
+.medications-list {
+    margin: 1.5rem 0;
+}
+
+.medications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.medication-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.medication-card:hover {
+    border-color: #94a3b8;
+}
+
+.medication-header {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.medication-header h4 {
+    color: #1e293b;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.remove-btn {
+    background-color: #fecaca;
+    border: 1px solid #ef4444;
+    color: #dc2626;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    background-color: #ef4444;
+    color: white;
+}
+
+.remove-btn i {
+    font-size: 1rem;
+}
+
+.medication-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #1e293b;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-field::placeholder {
+    color: #94a3b8;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+.input-group .input-field {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-suffix {
+    padding: 0.625rem 1rem;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-left: none;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.add-med-btn, .remove-med-btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0.5rem 0;
+}
+
+.add-med-btn {
+    background: var(--success);
+    color: white;
+    border: none;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.remove-med-btn {
+    background: var(--error);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.add-med-btn:hover {
+    background: #15803d;
+}
+
+.remove-med-btn:hover {
+    background: #dc2626;
 }
 
 .input-field {
@@ -199,23 +360,64 @@ h2 {
     color: #f9fbff;
 }
 
-/* ===== Logout Button ===== */
-/* ===== Logout Button (Top-Right Style) ===== */
-.logout-btn {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: linear-gradient(90deg, var(--error), #f87171);
-    color: var(--text-light);
+/* Button Styles */
+.btn-action {
+    padding: 8px 16px;
+    border-radius: 4px;
     border: none;
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-weight: 500;
     cursor: pointer;
-    transition: all 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e8f0;
+}
+
+.prescription-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Logout Button */
+.logout-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+    background-color: #dc2626;
 }
 
 .logout-btn::before {

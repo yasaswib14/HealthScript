@@ -25,95 +25,169 @@
           <div class="input-group">
             <label for="login-username">Username</label>
             <div class="input-wrapper">
-              <input id="login-username" name="username" type="text" ngModel required autocomplete="username"
-                placeholder="Your Username" />
+              <input id="login-username" 
+                     name="username" 
+                     type="text" 
+                     [(ngModel)]="loginData.username"
+                     #loginUsername="ngModel"
+                     required 
+                     autocomplete="username"
+                     placeholder="Enter your username"
+                     [class.invalid]="loginUsername.invalid && (loginUsername.dirty || loginUsername.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="loginUsername.invalid && (loginUsername.dirty || loginUsername.touched)">
+              <span *ngIf="loginUsername.errors?.['required']">Username is required</span>
             </div>
           </div>
 
           <div class="input-group">
             <label for="login-password">Password</label>
             <div class="input-wrapper">
-              <input id="login-password" name="password" type="password" ngModel required minlength="6"
-                autocomplete="current-password" placeholder="Your Password" />
+              <input id="login-password" 
+                     name="password" 
+                     type="password" 
+                     [(ngModel)]="loginData.password"
+                     #loginPassword="ngModel"
+                     required 
+                     autocomplete="current-password"
+                     placeholder="Enter your password"
+                     [class.invalid]="loginPassword.invalid && (loginPassword.dirty || loginPassword.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="loginPassword.invalid && (loginPassword.dirty || loginPassword.touched)">
+              <span *ngIf="loginPassword.errors?.['required']">Password is required</span>
             </div>
           </div>
 
-          <button type="submit" class="login-btn">Sign In</button>
+          <button type="submit" class="login-btn" [disabled]="loginForm.invalid || !validateLoginForm()">Sign In</button>
         </form>
-        <!-- 🔥 Login form properly closed above -->
 
         <!-- Register Form -->
         <form *ngIf="showRegister" #registerForm="ngForm" (ngSubmit)="onRegister(registerForm)">
           <div class="input-group">
             <label for="register-username">Username</label>
             <div class="input-wrapper">
-              <input id="register-username" name="username" type="text" ngModel required placeholder="Your Username" />
-              <svg class="input-icon" viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20v-2a6 6 0 0 1 12 0v2" />
-              </svg>
+              <input id="register-username" 
+                     name="username" 
+                     type="text" 
+                     [(ngModel)]="registerData.username"
+                     #regUsername="ngModel"
+                     required 
+                     minlength="3"
+                     placeholder="Choose a username"
+                     [class.invalid]="regUsername.invalid && (regUsername.dirty || regUsername.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regUsername.invalid && (regUsername.dirty || regUsername.touched)">
+              <span *ngIf="regUsername.errors?.['required']">Username is required</span>
+              <span *ngIf="regUsername.errors?.['minlength']">Username must be at least 3 characters</span>
             </div>
           </div>
 
           <div class="input-group">
             <label for="register-email">Email</label>
             <div class="input-wrapper">
-              <input id="register-email" name="email" type="email" ngModel required placeholder="Your Email" />
-              <svg class="input-icon" viewBox="0 0 24 24">
-                <rect x="2" y="7" width="20" height="10" rx="2" />
-                <polyline points="2,7 12,13 22,7" />
-              </svg>
+              <input id="register-email" 
+                     name="email" 
+                     type="email" 
+                     [(ngModel)]="registerData.email"
+                     #regEmail="ngModel"
+                     required 
+                     email
+                     pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                     placeholder="Enter your email"
+                     [class.invalid]="regEmail.invalid && (regEmail.dirty || regEmail.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regEmail.invalid && (regEmail.dirty || regEmail.touched)">
+              <span *ngIf="regEmail.errors?.['required']">Email is required</span>
+              <span *ngIf="regEmail.errors?.['email'] || regEmail.errors?.['pattern']">Please enter a valid email address</span>
             </div>
           </div>
 
           <div class="input-group">
             <label for="register-role">Role</label>
             <div class="input-wrapper">
-              <select id="register-role" name="role" ngModel required
-                (change)="selectedRole = registerForm.form.controls['role']?.value">
-                <option value="" disabled selected>Select role</option>
+              <select id="register-role" 
+                      name="role" 
+                      [(ngModel)]="registerData.role"
+                      #regRole="ngModel"
+                      required
+                      [class.invalid]="regRole.invalid && (regRole.dirty || regRole.touched)"
+                      (change)="selectedRole = regRole.value">
+                <option value="" disabled selected>Select your role</option>
                 <option value="ROLE_DOCTOR">Doctor</option>
                 <option value="ROLE_PATIENT">Patient</option>
               </select>
-              <svg class="input-icon" viewBox="0 0 24 24">
-                <rect x="3" y="11" width="18" height="7" rx="2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+            </div>
+            <div class="validation-message" *ngIf="regRole.invalid && (regRole.dirty || regRole.touched)">
+              <span *ngIf="regRole.errors?.['required']">Please select a role</span>
             </div>
           </div>
 
           <!-- 👇 Show Specialization if Doctor is selected -->
-          <div class="input-group" *ngIf="registerForm.form.controls['role']?.value === 'ROLE_DOCTOR'">
+          <div class="input-group" *ngIf="selectedRole === 'ROLE_DOCTOR'">
             <label for="register-specialization">Specialization</label>
             <div class="input-wrapper">
-              <select id="register-specialization" name="specialization" ngModel required>
-                <option value="" disabled selected>Select specialization</option>
+              <select id="register-specialization" 
+                      name="specialization" 
+                      [(ngModel)]="registerData.specialization"
+                      #regSpecialization="ngModel"
+                      required
+                      [class.invalid]="regSpecialization.invalid && (regSpecialization.dirty || regSpecialization.touched)">
+                <option value="" disabled selected>Select your specialization</option>
                 <option value="Cardiologist">Cardiologist</option>
                 <option value="Dermatologist">Dermatologist</option>
                 <option value="Gastroenterologist">Gastroenterologist</option>
                 <option value="Neurology">Neurology</option>
                 <option value="Pediatrician">Pediatrician</option>
               </select>
-              <svg class="input-icon" viewBox="0 0 24 24">
-                <rect x="3" y="11" width="18" height="7" rx="2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
+            </div>
+            <div class="validation-message" *ngIf="regSpecialization.invalid && (regSpecialization.dirty || regSpecialization.touched)">
+              <span *ngIf="regSpecialization.errors?.['required']">Please select your specialization</span>
             </div>
           </div>
 
           <div class="input-group">
             <label for="register-password">Password</label>
             <div class="input-wrapper">
-              <input id="register-password" name="password" type="password" ngModel required minlength="6"
-                placeholder="Your Password" />
-              <svg class="input-icon" viewBox="0 0 24 24">
-                <rect x="6" y="10" width="12" height="8" rx="2" />
-                <path d="M9 10V7a3 3 0 0 1 6 0v3" />
-              </svg>
+              <input id="register-password" 
+                     name="password" 
+                     type="password" 
+                     [(ngModel)]="registerData.password"
+                     #regPassword="ngModel"
+                     required 
+                     minlength="6"
+                     pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
+                     placeholder="Create a password" 
+                     [class.invalid]="regPassword.invalid && (regPassword.dirty || regPassword.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regPassword.invalid && (regPassword.dirty || regPassword.touched)">
+              <span *ngIf="regPassword.errors?.['required']">Password is required</span>
+              <span *ngIf="regPassword.errors?.['minlength']">Password must be at least 6 characters</span>
+              <span *ngIf="regPassword.errors?.['pattern']">Password must contain both letters and numbers</span>
             </div>
           </div>
 
-          <button type="submit" class="register-btn">Sign Up</button>
+          <div class="input-group">
+            <label for="register-confirm-password">Confirm Password</label>
+            <div class="input-wrapper">
+              <input id="register-confirm-password" 
+                     name="confirmPassword" 
+                     type="password" 
+                     [(ngModel)]="registerData.confirmPassword"
+                     #regConfirmPassword="ngModel"
+                     required 
+                     [pattern]="registerData.password"
+                     placeholder="Confirm your password" 
+                     [class.invalid]="regConfirmPassword.invalid && (regConfirmPassword.dirty || regConfirmPassword.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regConfirmPassword.invalid && (regConfirmPassword.dirty || regConfirmPassword.touched)">
+              <span *ngIf="regConfirmPassword.errors?.['required']">Please confirm your password</span>
+              <span *ngIf="regConfirmPassword.errors?.['pattern']">Passwords do not match</span>
+            </div>
+          </div>
+
+          <button type="submit" class="login-btn" [disabled]="registerForm.invalid || !validateRegisterForm()">
+            Create Account
+          </button>
 
           <div class="form-links" style="justify-content: flex-end;">
             <a href="#" class="register-link" (click)="showRegister = false">

@@ -1,103 +1,108 @@
 .dashboard-container {
-    max-width: 960px; /* Increased max-width to fit three cards side-by-side */
-    margin: 60px auto;
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 30px 40px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
-h2 {
-    text-align: center;
-    color: #1976d2;
-    margin-bottom: 10px;
-}
-
-.header-user-info {
+/* Dashboard Header */
+.dashboard-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
-    font-size: 14px;
-    color: #555;
+    margin-bottom: 40px;
+    padding: 20px 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.welcome-section h2 {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin: 0 0 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-display {
+    color: #64748b;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 15px;
 }
 
 /* --- NEW FEATURE CARD STYLES (Menu View) --- */
 .feature-cards-container {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
-    margin-top: 40px;
-    flex-wrap: wrap; /* Allows cards to wrap on smaller screens */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 24px;
 }
 
 .feature-card {
-    flex: 1 1 250px; /* Base for three columns */
-    background: #fdfdfd;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 25px 20px;
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
-}
-
-/* Highlight the middle card slightly, matching the image */
-.feature-card:nth-child(2) {
-    border: 2px solid #9c27b0; /* Purple border for Standard/Middle Card */
-    box-shadow: 0 8px 20px rgba(156, 39, 176, 0.15);
-    transform: scale(1.02);
+    cursor: pointer;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
 .icon-holder {
-    font-size: 32px;
-    width: 60px;
-    height: 60px;
-    margin: 0 auto 15px;
-    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
     color: white;
 }
 
-.icon-primary {
-    background-color: #ff9800; /* Orange */
-}
-
-.icon-secondary {
-    background-color: #9c27b0; /* Purple (Matching middle card border) */
-}
-
-.icon-tertiary {
-    background-color: #4caf50; /* Green */
-}
+.icon-primary { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+.icon-secondary { background: linear-gradient(135deg, #a855f7, #8b5cf6); }
+.icon-tertiary { background: linear-gradient(135deg, #34d399, #10b981); }
+.icon-info { background: linear-gradient(135deg, #94a3b8, #64748b); }
 
 .feature-card h3 {
-    color: #333;
-    margin-bottom: 10px;
-    font-size: 1.2rem;
+    font-size: 1.25rem;
+    color: #1e293b;
+    margin: 0 0 12px 0;
 }
 
 .feature-card p {
-    color: #777;
-    font-size: 0.9rem;
-    min-height: 40px; /* ensure consistent height */
-    margin-bottom: 20px;
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 20px 0;
 }
 
 .select-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
     color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
     border-radius: 8px;
     font-weight: 600;
     transition: opacity 0.3s;
@@ -243,4 +248,173 @@ form button[type="submit"]:hover {
 
 .logout-btn:hover {
     background-color: #b02a37;
+}
+
+/* Modern Button Styles */
+.btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-secondary {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.btn:hover {
+    filter: brightness(1.1);
+}
+
+/* Modern Form Styles */
+.consultation-form {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #1e293b;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Loading and Empty States */
+.loading-state,
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.loader {
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Section Headers */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .dashboard-container {
+        margin: 15px auto;
+        padding: 0 15px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .feature-cards-container {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Medication Status Icons */
+.medication-status {
+    font-size: 0.85rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.medication-status i {
+    font-size: 1rem;
+}
+
+.medication-status.active {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.medication-status.active i {
+    color: #059669;
+}
+
+.medication-status.completed {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.medication-status.completed i {
+    color: #64748b;
 }
