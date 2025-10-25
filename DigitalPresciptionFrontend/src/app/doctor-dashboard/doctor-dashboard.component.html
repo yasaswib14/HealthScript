@@ -5,7 +5,7 @@
             </div>
 
             <h1 class="header">👨‍⚕️ Doctor Dashboard</h1>
-<p class="subtext">Welcome, Doctor</p>
+<!-- <p class="subtext">Welcome, Doctor</p> -->
 
 <div class="status-box">
     <strong>Status:</strong> {{ apiMessage }}
@@ -40,51 +40,105 @@
             <p><strong>Time:</strong> {{ msg.timestamp | date:'medium' }}</p>
         </div>
 
-        <!-- Respond form (extended with dosageTiming & durationDays) -->
+        <!-- Respond form with multiple medications -->
         <form #prescriptionForm="ngForm" (ngSubmit)="respondToPatient(msg.id, prescriptionForm)"
             class="prescription-form">
-            <input type="text" name="diagnosis" ngModel required placeholder="Enter diagnosis"
+            <input type="text" name="diagnosis" [(ngModel)]="diagnosis" required placeholder="Enter diagnosis"
                 class="input-field" />
 
-            <input type="text" name="medication" ngModel required placeholder="Enter medication"
-                class="input-field" />
+            <!-- Medications List -->
+            <div class="medications-list">
+                <div *ngFor="let med of medications; let i = index" class="medication-card">
+                    <div class="medication-header">
+                        <h4>Medication {{i + 1}}</h4>
+                        <button type="button" *ngIf="medications.length > 1" 
+                            (click)="removeMedication(i)" class="remove-btn">
+                            <i class="fas fa-trash-alt"></i>
+                            Remove Medication
+                        </button>
+                    </div>
 
-            <!-- Dosage timing (optional but included in payload) -->
-            <div class="form-row">
-                <label for="dosageTiming-{{msg.id}}">Dosage timing</label>
-                <select id="dosageTiming-{{msg.id}}" name="dosageTiming" ngModel class="input-field">
-                    <option value="">-- select timing (optional) --</option>
-                    <option value="Morning">Morning</option>
-                    <option value="Afternoon">Afternoon</option>
-                    <option value="Evening">Evening</option>
-                    <option value="Night">Night</option>
-                    <option value="Morning, Night">Morning & Night</option>
-                    <option value="Other">Other</option>
-                </select>
+                    <div class="medication-grid">
+                        <!-- Medication Name -->
+                        <div class="form-group full-width">
+                            <label [for]="'medicationName-' + i">Medication Name</label>
+                            <input type="text" [id]="'medicationName-' + i" 
+                                [(ngModel)]="med.medicationName" 
+                                [name]="'medicationName' + i" 
+                                required 
+                                placeholder="Enter medication name" 
+                                class="input-field" />
+                        </div>
+
+                        <!-- Dosage Timing -->
+                        <div class="form-group">
+                            <label [for]="'dosageTiming-' + i">Dosage Timing</label>
+                            <select [id]="'dosageTiming-' + i" 
+                                [(ngModel)]="med.dosageTiming" 
+                                [name]="'dosageTiming' + i" 
+                                class="input-field" 
+                                required>
+                                <option value="">Select timing</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Afternoon">Afternoon</option>
+                                <option value="Evening">Evening</option>
+                                <option value="Night">Night</option>
+                                <option value="Morning, Night">Morning & Night</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+
+                        <!-- Duration -->
+                        <div class="form-group">
+                            <label [for]="'durationDays-' + i">Duration</label>
+                            <div class="input-group">
+                                <input [id]="'durationDays-' + i" 
+                                    [(ngModel)]="med.durationDays" 
+                                    [name]="'durationDays' + i" 
+                                    type="number" 
+                                    min="1" 
+                                    required
+                                    placeholder="Number of days" 
+                                    class="input-field" />
+                                <span class="input-suffix">days</span>
+                            </div>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="form-group">
+                            <label [for]="'startDate-' + i">Start Date</label>
+                            <input [id]="'startDate-' + i" 
+                                [(ngModel)]="med.startDate" 
+                                [name]="'startDate' + i" 
+                                type="date" 
+                                required
+                                class="input-field" />
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Duration days (optional) -->
-            <div class="form-row">
-                <label for="durationDays-{{msg.id}}">Duration (days)</label>
-                <input id="durationDays-{{msg.id}}" name="durationDays" type="number" min="0" ngModel
-                    placeholder="e.g. 5" class="input-field" />
+            <div class="prescription-buttons">
+                <button type="button" (click)="addMedication()" class="btn-action btn-secondary">
+                    <i class="fas fa-plus"></i> Add Medication
+                </button>
+                <button type="submit" [disabled]="isFormInvalid(prescriptionForm)" class="btn-action btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send Prescription
+                </button>
             </div>
-
-            <button type="submit" [disabled]="prescriptionForm.invalid" class="respond-btn">
-                💊 Send Prescription
-            </button>
         </form>
     </div>
 </div>
 
-<!-- ✅ Show fallback when loaded but empty -->
-<div *ngIf="!isLoading && (!messages || messages.length === 0)">
-    <p class="loader-text">No messages assigned to you yet 🕊️</p>
+<!-- Empty State -->
+<div *ngIf="!isLoading && (!messages || messages.length === 0)" class="empty-state">
+    <p>No messages assigned to you yet 🕊️</p>
 </div>
 
-<hr>
-
-<button class="logout-btn" (click)="logout()">🚪 Logout</button>
+<!-- Logout Button -->
+<button class="logout-button" (click)="logout()">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</button>
 
 
 </div>

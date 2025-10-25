@@ -16,6 +16,8 @@ export class DoctorDashboardComponent implements OnInit {
     apiMessage: string = '';
     messages: any[] = [];
     isLoading: boolean = true;
+    medications: any[] = [];
+    diagnosis: string = '';
 
     showSuccess: boolean = false;
     showError: boolean = false;
@@ -25,7 +27,26 @@ export class DoctorDashboardComponent implements OnInit {
         private http: HttpClient,
         private router: Router,
         private cdr: ChangeDetectorRef
-    ) { }
+    ) { 
+        // Initialize with one empty medication
+        this.addMedication();
+    }
+
+    addMedication() {
+        this.medications.push({
+            medicationName: '',
+            dosageTiming: '',
+            durationDays: 1,
+            startDate: new Date().toISOString().split('T')[0]
+        });
+    }
+
+    removeMedication(index: number) {
+        this.medications.splice(index, 1);
+        if (this.medications.length === 0) {
+            this.addMedication(); // Always keep at least one medication
+        }
+    }
 
     ngOnInit(): void {
         // ✅ Skip SSR phase and wait for client hydration
@@ -88,17 +109,25 @@ export class DoctorDashboardComponent implements OnInit {
             });
     }
 
-    // ✅ Respond to a patient's message (now includes dosageTiming & durationDays)
+    // ✅ Respond to a patient's message (now includes multiple medications)
     respondToPatient(messageId: number, form: NgForm) {
-        if (!form.valid) {
-            alert('⚠️ Please fill out required fields (diagnosis & medication).');
+        if (this.isFormInvalid(form)) {
+            this.showError = true;
+            this.messageText = 'Please fill in all required fields for medications';
+            setTimeout(() => {
+                this.showError = false;
+                this.messageText = '';
+            }, 3000);
             return;
         }
 
         const token = localStorage.getItem('jwtToken');
         if (!token) {
-            alert('Unauthorized. Please log in again.');
-            this.router.navigateByUrl('/');
+            this.showError = true;
+            this.messageText = 'Please log in again';
+            setTimeout(() => {
+                this.router.navigateByUrl('/auth');
+            }, 2000);
             return;
         }
 
@@ -107,35 +136,66 @@ export class DoctorDashboardComponent implements OnInit {
             'Content-Type': 'application/json'
         });
 
-        // read and sanitize optional fields
-        const dosageTiming = form.value.dosageTiming || '';
-        // durationDays may come as string from form control; make integer (0 if blank/NaN)
-        const durationDays = form.value.durationDays ? Number(form.value.durationDays) : 0;
-
         const payload = {
-            diagnosis: form.value.diagnosis,
-            medication: form.value.medication,
-            dosageTiming: dosageTiming,
-            durationDays: Number.isNaN(durationDays) ? 0 : durationDays
+            diagnosis: this.diagnosis,
+            medications: this.medications.map(med => ({
+                medicationName: med.medicationName,
+                dosageTiming: med.dosageTiming,
+                durationDays: +med.durationDays, // ensure it's a number
+                startDate: med.startDate
+            }))
         };
 
         this.http.post(`http://localhost:8081/doctor/respond/${messageId}`, payload, { headers })
             .subscribe({
                 next: () => {
-                    alert('✅ Prescription sent successfully!');
+                    this.showSuccess = true;
+                    this.messageText = '✅ Prescription sent successfully!';
+                    setTimeout(() => {
+                        this.showSuccess = false;
+                        this.messageText = '';
+                    }, 3000);
+
+                    // Reset form and medications
+                    this.diagnosis = '';
+                    this.medications = [{
+                        medicationName: '',
+                        dosageTiming: '',
+                        durationDays: 1,
+                        startDate: new Date().toISOString().split('T')[0]
+                    }];
                     form.reset();
 
+                    // Update messages list
                     this.messages = this.messages.filter(msg => msg.id !== messageId);
-                    // optionally refresh messages to reflect state
                     const authToken = localStorage.getItem('jwtToken') || '';
                     const hdrs = new HttpHeaders({ 'Authorization': `Bearer ${authToken}` });
                     this.fetchMessages(hdrs);
                 },
                 error: (err) => {
                     console.error('❌ Error sending prescription:', err);
-                    alert('❌ Failed to send prescription.');
+                    this.showError = true;
+                    this.messageText = '❌ Failed to send prescription: ' + 
+                        (err.error?.message || err.statusText || 'Unknown error');
+                    setTimeout(() => {
+                        this.showError = false;
+                        this.messageText = '';
+                    }, 5000);
                 }
             });
+    }
+
+    isFormInvalid(form: NgForm): boolean {
+        if (form.invalid || this.medications.length === 0) {
+            return true;
+        }
+        
+        return this.medications.some(med => {
+            return !med.medicationName || 
+                   !med.dosageTiming || 
+                   !med.durationDays || 
+                   med.durationDays < 1;
+        });
     }
 
     logout(): void {

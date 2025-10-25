@@ -1,45 +1,134 @@
-<div class="card p-6 bg-white shadow-lg rounded-xl">
-  <h3 class="text-2xl font-semibold text-indigo-700 mb-4 border-b pb-2">
-    Daily Medication Schedule
-  </h3>
-
-  <div *ngIf="loading" class="text-center py-8 text-gray-500">Loading reminders...</div>
-
-  <div *ngIf="errorMessage" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-    <p class="font-bold">Error:</p>
-    <p>{{ errorMessage }}</p>
-    <button (click)="loadReminders()" class="underline text-sm font-semibold mt-2">Try Again</button>
-  </div>
-
-  <div *ngIf="!loading && groupedReminders.length > 0">
-    <div *ngFor="let med of groupedReminders" class="mb-6 p-4 rounded-lg shadow bg-gray-50">
-      <div class="flex justify-between items-center mb-3">
-        <div>
-          <strong class="text-lg text-indigo-700">{{ med.medicationName }}</strong>
-          <p class="text-sm text-gray-600">Dose: {{ med.dosageTiming }}</p>
-        </div>
-        <span class="text-sm text-gray-500">{{ med.durationDays }} day course</span>
-      </div>
-
-      <!-- ✅ Checkboxes for each day -->
-      <div class="flex flex-wrap gap-2">
-        <label *ngFor="let day of med.days" class="flex items-center space-x-1">
-          <input type="checkbox" [checked]="day.taken" [disabled]="!day.isToday || day.taken"
-            (change)="markDayAsTaken(med.medicationId, day)" class="accent-indigo-600 cursor-pointer" />
-          <span [ngClass]="{
-              'text-green-600': day.taken,
-              'text-gray-400': !day.isToday && !day.taken,
-              'text-indigo-600': day.isToday
-            }" class="text-sm font-medium">
-            {{ day.dayNumber }}
-          </span>
-        </label>
-      </div>
+<div class="reminders-container">
+    <div class="reminders-header">
+        <h2>📅 Today's Medication Schedule</h2>
+        <p class="date-display">{{ currentDate | date:'fullDate' }}</p>
     </div>
-  </div>
 
-  <div *ngIf="!loading && groupedReminders.length === 0 && !errorMessage"
-    class="text-center py-8 text-gray-600 bg-gray-50 rounded-lg">
-    🎉 All clear! No outstanding reminders for today.
-  </div>
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading-state">
+        <div class="loader"></div>
+        <p>Loading your medication schedule...</p>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="errorMessage" class="error-message">
+        <div class="error-content">
+            <span class="error-icon">⚠️</span>
+            <p>{{ errorMessage }}</p>
+            <button (click)="loadReminders()" class="retry-button">
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <!-- Reminders List -->
+    <div *ngIf="!loading && reminders.length > 0" class="reminders-list">
+        <div *ngFor="let reminder of reminders" class="reminder-card" 
+             [ngClass]="{'taken': reminder.taken, 'missed': isMissed(reminder)}">
+            <div class="reminder-content">
+                <div class="medication-info">
+                    <h3>💊 {{ reminder.medication.medicationName }}</h3>
+                    <div class="timing-info">
+                        <span class="timing-badge">{{ reminder.medication.dosageTiming }}</span>
+                        <span class="duration-badge">
+                            Day {{ getDayNumber(reminder) }} of {{ reminder.medication.durationDays }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="reminder-status">
+                    <div class="status-indicator" [ngClass]="{
+                        'status-taken': reminder.taken,
+                        'status-pending': !reminder.taken && !isMissed(reminder),
+                        'status-missed': !reminder.taken && isMissed(reminder)
+                    }">
+                        <span *ngIf="reminder.taken">✅ Taken</span>
+                        <span *ngIf="!reminder.taken && !isMissed(reminder)">⏳ Pending</span>
+                        <span *ngIf="!reminder.taken && isMissed(reminder)">❌ Missed</span>
+                    </div>
+
+                    <button *ngIf="!reminder.taken && !isMissed(reminder)"
+                            (click)="markTaken(reminder.medication.id)"
+                            class="take-button">
+                        Mark as Taken
+                    </button>
+                </div>
+            </div>
+
+            <div class="reminder-progress">
+                <div class="progress-bar">
+                    <div class="progress-filled" 
+                         [style.width]="getProgressPercentage(reminder) + '%'">
+                    </div>
+                </div>
+                <span class="progress-text">
+                    {{ getDaysRemaining(reminder) }} days remaining
+                </span>
+            </div>
+
+            <!-- Medication History -->
+            <div class="medication-history" [class.completed-course]="isCourseCompleted(reminder)">
+                <div class="history-header">
+                    <div class="history-title">
+                        <span class="history-icon">📊</span>
+                        <span>Medication History</span>
+                    </div>
+                    <div class="course-status" *ngIf="isCourseCompleted(reminder)">
+                        ✨ Course Completed
+                    </div>
+                </div>
+
+                <!-- Active and Upcoming Days -->
+                <div class="history-section" *ngIf="getActiveDays(reminder).length > 0">
+                    <div class="section-header">
+                        <h4 class="section-title">Current & Upcoming Days</h4>
+                    </div>
+                    <div class="days-grid">
+                        <div *ngFor="let day of getActiveDays(reminder)" class="day-item">
+                            <div class="day-header">
+                                <span class="day-number">Day {{ day.dayNumber }} - </span>
+                                <span class="day-date">{{ formatDate(day.date) }}</span>
+                            </div>
+                            <div class="day-status" [ngClass]="{
+                                'status-missed': day.missed && !day.taken,
+                                'status-pending': day.isToday && !day.taken,
+                                'status-future': !day.isToday && !day.taken && !day.missed
+                            }">
+                                {{ getStatusText(day) }} 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Completed Days -->
+                <div class="history-section completed-section" *ngIf="getCompletedDays(reminder).length > 0">
+                    <div class="section-header">
+                        <h4 class="section-title">
+                            <span class="title-icon">✅</span> 
+                            Completed Days
+                        </h4>
+                    </div>
+                    <div class="days-grid">
+                        <div *ngFor="let day of getCompletedDays(reminder)" class="day-item taken-item">
+                            <div class="day-header">
+                                <span class="day-number">Day {{ day.dayNumber }}</span>
+                                <span class="day-date">{{ formatDate(day.date) }}</span>
+                            </div>
+                            <div class="day-status status-taken">
+                                Taken
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && reminders.length === 0 && !errorMessage" class="empty-state">
+        <span class="empty-icon">🎉</span>
+        <h3>All Clear!</h3>
+        <p>You have no medications scheduled for today.</p>
+    </div>
 </div>

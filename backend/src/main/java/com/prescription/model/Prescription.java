@@ -2,6 +2,8 @@ package com.prescription.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Prescription {
@@ -19,18 +21,21 @@ public class Prescription {
     private User patient;
 
     private String diagnosis;
-    private String medication;
     private LocalDateTime issuedAt = LocalDateTime.now();
 
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Medication> medications = new ArrayList<>();
+
     public Prescription() {
+        this.medications = new ArrayList<>();
     }
 
-    public Prescription(User doctor, User patient, String diagnosis, String medication) {
+    public Prescription(User doctor, User patient, String diagnosis) {
         this.doctor = doctor;
         this.patient = patient;
         this.diagnosis = diagnosis;
-        this.medication = medication;
         this.issuedAt = LocalDateTime.now();
+        this.medications = new ArrayList<>();
     }
 
     // ✅ Getters and Setters
@@ -66,12 +71,12 @@ public class Prescription {
         this.diagnosis = diagnosis;
     }
 
-    public String getMedication() {
-        return medication;
+    public List<Medication> getMedications() {
+        return medications;
     }
 
-    public void setMedication(String medication) {
-        this.medication = medication;
+    public void setMedications(List<Medication> medications) {
+        this.medications = medications;
     }
 
     public LocalDateTime getIssuedAt() {
@@ -80,5 +85,16 @@ public class Prescription {
 
     public void setIssuedAt(LocalDateTime issuedAt) {
         this.issuedAt = issuedAt;
+    }
+
+    // Helper methods for managing medications
+    public void addMedication(Medication medication) {
+        medications.add(medication);
+        medication.setPrescription(this);
+    }
+
+    public void removeMedication(Medication medication) {
+        medications.remove(medication);
+        medication.setPrescription(null);
     }
 }

@@ -4,6 +4,20 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
+interface LoginData {
+    username: string;
+    password: string;
+}
+
+interface RegisterData {
+    username: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    role: string;
+    specialization?: string;
+}
+
 @Component({
     selector: 'app-auth',
     standalone: true,
@@ -16,20 +30,106 @@ export class AuthComponent {
     protected readonly title = signal('DigitalPrescriptionFrontend');
     showRegister = false;
     selectedRole = '';
-    isRedirecting = false; // NEW flag to show blur + overlay
+    isRedirecting = false;
+
+    // Form models
+    loginData: LoginData = {
+        username: '',
+        password: ''
+    };
+
+    registerData: RegisterData = {
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        role: '',
+        specialization: ''
+    };
 
     constructor(private http: HttpClient, public router: Router) { }
+
+    // Form toggle with reset
+    toggleForm() {
+        this.showRegister = !this.showRegister;
+        if (this.showRegister) {
+            this.registerData = {
+                username: '',
+                email: '',
+                password: '',
+                confirmPassword: '',
+                role: '',
+                specialization: ''
+            };
+        } else {
+            this.loginData = {
+                username: '',
+                password: ''
+            };
+        }
+    }
+
+    // Password validation method
+    validatePassword(password: string | undefined): boolean {
+        if (!password) return false;
+        const minLength = 6;
+        const hasLetter = /[A-Za-z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        return password.length >= minLength && hasLetter && hasNumber;
+    }
+
+    // Confirm password validation
+    passwordsMatch(): boolean {
+        return Boolean(this.registerData.password) && 
+               Boolean(this.registerData.confirmPassword) &&
+               this.registerData.password === this.registerData.confirmPassword;
+    }
+
+    // Email validation
+    validateEmail(email: string | undefined): boolean {
+        if (!email) return false;
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailPattern.test(email);
+    }
+
+    // Login form validation
+    validateLoginForm(): boolean {
+        return Boolean(this.loginData.username) &&
+               this.loginData.username.length >= 3 && 
+               this.validatePassword(this.loginData.password);
+    }
+
+    // Register form validation
+    validateRegisterForm(): boolean {
+        const hasValidUsername = Boolean(this.registerData.username) && 
+                               this.registerData.username.length >= 3;
+        const hasValidEmail = this.validateEmail(this.registerData.email);
+        const hasValidPassword = this.validatePassword(this.registerData.password);
+        const hasValidRole = Boolean(this.registerData.role);
+        
+        // Specialization check only if doctor role is selected
+        const needsSpecialization = this.registerData.role === 'ROLE_DOCTOR';
+        const hasValidSpecialization = needsSpecialization ? 
+            Boolean(this.registerData.specialization && this.registerData.specialization.trim()) : true;
+
+        return hasValidUsername &&
+               hasValidEmail &&
+               hasValidPassword &&
+               this.passwordsMatch() &&
+               hasValidRole &&
+               hasValidSpecialization;
+    }
 
     /**
      * ✅ Login and decode JWT to detect role
      */
     onLogin(form: NgForm) {
-    if (form.valid) {
-        const { username, password } = form.value;
-        this.isRedirecting = true; // 👈 1. Start overlay
+        if (form.valid && this.validateLoginForm()) {
+            const { username, password } = this.loginData;
+            this.isRedirecting = true;
 
-        this.http.post<{ token: string }>('http://localhost:8081/auth/login', { username, password })
-            .subscribe({
+            this.http.post<{ token: string }>('http://localhost:8081/auth/login', { username, password })
+                .subscribe({
                 next: (response) => {
                     // REMOVE THE alert('Redirecting....'); LINE COMPLETELY!
                     localStorage.setItem('jwtToken', response.token);
@@ -63,6 +163,11 @@ export class AuthComponent {
                     // 4. Stop overlay and show error alert on authentication failure
                     this.isRedirecting = false; 
                     alert(err.error?.message || 'Invalid credentials. Please try again.');
+                    form.resetForm(); // Reset the form
+                    this.loginData = { // Reset the login data
+                        username: '',
+                        password: ''
+                    };
                 }
             });
     }
@@ -75,8 +180,8 @@ export class AuthComponent {
     // Inside AuthComponent.ts
 
 onRegister(form: NgForm) {
-    if (form.valid) {
-        const { username, email, role, password, specialization } = form.value;
+    if (form.valid && this.validateRegisterForm()) {
+        const { username, email, role, password, specialization } = this.registerData;
 
         // 1. Initiate API call
         this.http.post('http://localhost:8081/auth/register', {

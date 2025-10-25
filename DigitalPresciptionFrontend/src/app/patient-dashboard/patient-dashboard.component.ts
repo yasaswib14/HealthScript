@@ -25,6 +25,15 @@ export class PatientDashboardComponent implements OnInit {
   prescriptions: any[] = [];
   isLoading: boolean = false;
   selectedSpecialist: string = '';
+  currentDate: Date = new Date();
+  hasActiveReminders: boolean = false;
+
+  // Status constants
+  private readonly STATUS = {
+    ACTIVE: 'active',
+    COMPLETED: 'completed',
+    UPCOMING: 'upcoming'
+  };
 
   private safeAlert(message: string): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -43,6 +52,12 @@ export class PatientDashboardComponent implements OnInit {
       // Load prescriptions data even if we start on the 'menu' view
       this.loadPrescriptions(headers); 
     }
+
+    // Start interval to update currentDate every minute
+    setInterval(() => {
+      this.currentDate = new Date();
+      this.cdr.detectChanges();
+    }, 60000); // Update every minute
   }
 
   private loadPrescriptions(headers: HttpHeaders): void {
@@ -50,8 +65,17 @@ export class PatientDashboardComponent implements OnInit {
     this.http.get('http://localhost:8081/patient/prescriptions', { headers })
       .subscribe({
         next: (data: any) => {
-          console.log('💊 Prescriptions fetched:', data);
-          this.prescriptions = data || [];
+          console.log('💊 Prescriptions fetched:', JSON.stringify(data, null, 2));
+          // Transform the data to match our template's expectations
+          this.prescriptions = (data || []).map((p: any) => ({
+            ...p,
+            doctor: {
+              username: p.doctorName, // Backend sends doctorName instead of doctor object
+              specialization: p.doctorSpecialization // If available in the response
+            },
+            medications: p.medications || []
+          }));
+          this.updateMedicationStatus(); // Update active reminders status
           this.isLoading = false;
           this.cdr.detectChanges();
         },
@@ -140,5 +164,76 @@ onAgeChange(age: string, form: NgForm): void {
       localStorage.removeItem('jwtToken');
     }
     this.router.navigate(['/']); // Redirect to login
+  }
+
+  /**
+   * Check if a medication is currently active
+   */
+  isActiveMedication(medication: any): boolean {
+    const today = new Date();
+    const startDate = new Date(medication.startDate);
+    const endDate = new Date(medication.endDate);
+    return startDate <= today && today <= endDate;
+  }
+
+  /**
+   * Check if a medication course is completed
+   */
+  isMedicationCompleted(medication: any): boolean {
+    const today = new Date();
+    const endDate = new Date(medication.endDate);
+    return today > endDate;
+  }
+
+  /**
+   * Get the current status of a medication
+   */
+  getMedicationStatus(medication: any): string {
+    if (this.isMedicationCompleted(medication)) {
+      return 'Completed';
+    }
+    if (this.isActiveMedication(medication)) {
+      return 'Active';
+    }
+    return 'Upcoming';
+  }
+
+  /**
+   * Get appropriate icon class for medication status
+   */
+  getMedicationStatusIcon(medication: any): string {
+    if (this.isMedicationCompleted(medication)) {
+      return 'fas fa-check-circle';
+    }
+    if (this.isActiveMedication(medication)) {
+      return 'fas fa-capsules';
+    }
+    return 'fas fa-clock';
+  }
+
+  /**
+   * Calculate the progress percentage of a medication course
+   */
+  getMedicationProgress(medication: any): number {
+    const today = new Date();
+    const startDate = new Date(medication.startDate);
+    const endDate = new Date(medication.endDate);
+    
+    if (today < startDate) return 0;
+    if (today > endDate) return 100;
+    
+    const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    const daysElapsed = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    return Math.min(100, Math.round((daysElapsed / totalDays) * 100));
+  }
+
+  /**
+   * Update medication active status when loading prescriptions
+   */
+  private updateMedicationStatus(): void {
+    this.hasActiveReminders = this.prescriptions.some(prescription => 
+      prescription.medications?.some((med: any) => this.isActiveMedication(med))
+    );
   }
 }

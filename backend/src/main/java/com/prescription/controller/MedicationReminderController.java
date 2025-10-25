@@ -3,6 +3,9 @@ package com.prescription.controller;
 import com.prescription.model.Medication;
 import com.prescription.model.MedicationReminder;
 import com.prescription.model.User;
+import com.prescription.dto.MedicationDTO;
+import com.prescription.dto.MedicationReminderDTO;
+import org.springframework.transaction.annotation.Transactional;
 import com.prescription.repository.MedicationRepository;
 import com.prescription.repository.MedicationReminderRepository;
 import com.prescription.repository.UserRepository;
@@ -47,11 +50,10 @@ public class MedicationReminderController {
      */
 
     @GetMapping("/today")
-    public ResponseEntity<?> getTodayReminders(Authentication auth) {
-        User patient = userRepository.findByUsername(auth.getName()).orElse(null);
-        if (patient == null) {
-            return ResponseEntity.status(401).body("Unauthorized");
-        }
+    @Transactional
+    public ResponseEntity<List<MedicationReminderDTO>> getTodayReminders(Authentication auth) {
+        User patient = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         LocalDate today = LocalDate.now();
         List<MedicationReminder> allReminders = new ArrayList<>();
@@ -64,37 +66,42 @@ public class MedicationReminderController {
                 med.setStartDate(today);
             }
 
-            int duration = Math.max(med.getDurationDays(), 1);
+            // Only get/create reminder for today
+            List<MedicationReminder> existing = reminderRepository.findByMedicationAndDate(med, today);
+            MedicationReminder reminder;
 
-            for (int day = 1; day <= duration; day++) {
-                LocalDate dayDate = med.getStartDate().plusDays(day - 1);
-
-                // Try to find an existing reminder for that specific day
-                List<MedicationReminder> existing = reminderRepository.findByMedicationAndDate(med, dayDate);
-                MedicationReminder reminder;
-
-                if (existing.isEmpty()) {
-                    reminder = new MedicationReminder();
-                    reminder.setMedication(med);
-                    reminder.setPatient(patient);
-                    reminder.setDate(dayDate);
-                    reminder.setDayNumber(day);
-                    reminder.setTaken(false); // future or new reminder is not taken
-                    reminderRepository.save(reminder);
-                } else {
-                    reminder = existing.get(0);
-                    // ensure dayNumber is set
-                    if (reminder.getDayNumber() == 0) {
-                        reminder.setDayNumber(day);
-                        reminderRepository.save(reminder);
-                    }
-                }
-
+            if (existing.isEmpty() && !med.getStartDate().isAfter(today) && 
+                (med.getEndDate() == null || !med.getEndDate().isBefore(today))) {
+                reminder = new MedicationReminder();
+                reminder.setMedication(med);
+                reminder.setPatient(patient);
+                reminder.setDate(today);
+                reminder.setTaken(false);
+                reminderRepository.save(reminder);
                 allReminders.add(reminder);
+            } else if (!existing.isEmpty()) {
+                allReminders.add(existing.get(0));
             }
         }
 
-        return ResponseEntity.ok(allReminders);
+        // Convert to DTOs to prevent circular references
+        List<MedicationReminderDTO> reminderDTOs = allReminders.stream()
+                .map(reminder -> new MedicationReminderDTO(
+                    reminder.getId(),
+                    new MedicationDTO(
+                        reminder.getMedication().getId(),
+                        reminder.getMedication().getMedicationName(),
+                        reminder.getMedication().getDosageTiming(),
+                        reminder.getMedication().getDurationDays(),
+                        reminder.getMedication().getStartDate(),
+                        reminder.getMedication().getEndDate()
+                    ),
+                    reminder.getDate(),
+                    reminder.isTaken()
+                ))
+                .toList();
+        
+        return ResponseEntity.ok(reminderDTOs);
     }
 
     /**
