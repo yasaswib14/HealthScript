@@ -4,6 +4,16 @@ import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http'
 import { Router } from '@angular/router';
 import { FormsModule, NgForm } from '@angular/forms';
 
+interface PrescriptionData {
+    diagnosis: string;
+    medications: Array<{
+        medicationName: string;
+        dosageTiming: string;
+        durationDays: number;
+        startDate: string;
+    }>;
+}
+
 @Component({
     selector: 'app-doctor-dashboard',
     standalone: true,
@@ -16,8 +26,8 @@ export class DoctorDashboardComponent implements OnInit {
     apiMessage: string = '';
     messages: any[] = [];
     isLoading: boolean = true;
-    medications: any[] = [];
-    diagnosis: string = '';
+    prescriptionDataMap: Map<number, PrescriptionData> = new Map();
+    formSubmitted: { [key: number]: boolean } = {};
 
     showSuccess: boolean = false;
     showError: boolean = false;
@@ -27,25 +37,41 @@ export class DoctorDashboardComponent implements OnInit {
         private http: HttpClient,
         private router: Router,
         private cdr: ChangeDetectorRef
-    ) { 
-        // Initialize with one empty medication
-        this.addMedication();
-    }
+    ) { }
 
-    addMedication() {
-        this.medications.push({
+    addMedication(messageId: number) {
+        const prescriptionData = this.getPrescriptionData(messageId);
+        prescriptionData.medications.push({
             medicationName: '',
             dosageTiming: '',
             durationDays: 1,
             startDate: new Date().toISOString().split('T')[0]
         });
+        this.prescriptionDataMap.set(messageId, prescriptionData);
     }
 
-    removeMedication(index: number) {
-        this.medications.splice(index, 1);
-        if (this.medications.length === 0) {
-            this.addMedication(); // Always keep at least one medication
+    removeMedication(messageId: number, index: number) {
+        const prescriptionData = this.getPrescriptionData(messageId);
+        prescriptionData.medications.splice(index, 1);
+        if (prescriptionData.medications.length === 0) {
+            this.addMedication(messageId); // Always keep at least one medication
         }
+        this.prescriptionDataMap.set(messageId, prescriptionData);
+    }
+
+    getPrescriptionData(messageId: number): PrescriptionData {
+        if (!this.prescriptionDataMap.has(messageId)) {
+            this.prescriptionDataMap.set(messageId, {
+                diagnosis: '',
+                medications: [{
+                    medicationName: '',
+                    dosageTiming: '',
+                    durationDays: 1,
+                    startDate: new Date().toISOString().split('T')[0]
+                }]
+            });
+        }
+        return this.prescriptionDataMap.get(messageId)!;
     }
 
     ngOnInit(): void {
@@ -110,8 +136,47 @@ export class DoctorDashboardComponent implements OnInit {
     }
 
     // ✅ Respond to a patient's message (now includes multiple medications)
+    validateAndSubmit(messageId: number, form: NgForm) {
+        // Mark the form as submitted
+        this.formSubmitted[messageId] = true;
+        
+        // Get prescription data
+        const prescriptionData = this.getPrescriptionData(messageId);
+        
+        // Mark all fields as touched to trigger validation
+        Object.values(form.controls).forEach(control => {
+            control.markAsTouched();
+            control.updateValueAndValidity();
+        });
+        
+        // Check for missing diagnosis
+        if (!prescriptionData.diagnosis || prescriptionData.diagnosis.trim() === '') {
+            this.showError = true;
+            this.messageText = '⚠️ Please enter a diagnosis for the patient';
+            
+            // Scroll to the diagnosis field
+            const diagnosisField = document.getElementById('diagnosis-' + messageId);
+            if (diagnosisField) {
+                diagnosisField.focus();
+                diagnosisField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            setTimeout(() => {
+                this.showError = false;
+                this.messageText = '';
+            }, 3000);
+            return;
+        }
+        
+        // If validation passes, submit the form
+        this.respondToPatient(messageId, form);
+    }
+
     respondToPatient(messageId: number, form: NgForm) {
-        if (this.isFormInvalid(form)) {
+        const prescriptionData = this.getPrescriptionData(messageId);
+
+        // Then validate the rest of the form
+        if (this.isFormInvalid(messageId, form)) {
             this.showError = true;
             this.messageText = 'Please fill in all required fields for medications';
             setTimeout(() => {
@@ -135,13 +200,12 @@ export class DoctorDashboardComponent implements OnInit {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
         });
-
         const payload = {
-            diagnosis: this.diagnosis,
-            medications: this.medications.map(med => ({
+            diagnosis: prescriptionData.diagnosis,
+            medications: prescriptionData.medications.map(med => ({
                 medicationName: med.medicationName,
                 dosageTiming: med.dosageTiming,
-                durationDays: +med.durationDays, // ensure it's a number
+                durationDays: +med.durationDays,
                 startDate: med.startDate
             }))
         };
@@ -156,14 +220,9 @@ export class DoctorDashboardComponent implements OnInit {
                         this.messageText = '';
                     }, 3000);
 
-                    // Reset form and medications
-                    this.diagnosis = '';
-                    this.medications = [{
-                        medicationName: '',
-                        dosageTiming: '',
-                        durationDays: 1,
-                        startDate: new Date().toISOString().split('T')[0]
-                    }];
+                    // Reset form and submission state for this specific message
+                    this.prescriptionDataMap.delete(messageId);
+                    this.formSubmitted[messageId] = false;
                     form.reset();
 
                     // Update messages list
@@ -185,17 +244,36 @@ export class DoctorDashboardComponent implements OnInit {
             });
     }
 
-    isFormInvalid(form: NgForm): boolean {
-        if (form.invalid || this.medications.length === 0) {
+    isFormInvalid(messageId: number, form: NgForm): boolean {
+        const prescriptionData = this.getPrescriptionData(messageId);
+        
+        // Check if form is invalid or if there are no medications
+        if (form.invalid || prescriptionData.medications.length === 0) {
             return true;
         }
         
-        return this.medications.some(med => {
+        // Check if diagnosis is empty or contains only whitespace
+        if (!prescriptionData.diagnosis || prescriptionData.diagnosis.trim() === '') {
+            this.showError = true;
+            this.messageText = 'Please enter a diagnosis';
+            setTimeout(() => {
+                this.showError = false;
+                this.messageText = '';
+            }, 3000);
+            return true;
+        }
+        
+        // Check if all medications are properly filled
+        return prescriptionData.medications.some(med => {
             return !med.medicationName || 
                    !med.dosageTiming || 
                    !med.durationDays || 
                    med.durationDays < 1;
         });
+    }
+
+    getTodayDate(): string {
+        return new Date().toISOString().split('T')[0];
     }
 
     logout(): void {
