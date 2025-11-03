@@ -19,7 +19,6 @@ export class TodayRemindersComponent implements OnInit {
   private authHeaders?: HttpHeaders;
   currentDate = new Date();
 
-  // Status constants for better readability
   readonly STATUS = {
     TAKEN: 'taken',
     MISSED: 'missed',
@@ -68,16 +67,15 @@ export class TodayRemindersComponent implements OnInit {
       error: (error: HttpErrorResponse) => {
         console.error('❌ Error fetching reminders:', error);
         this.errorMessage =
-          error.status === 401
-            ? 'Unauthorized (401): Please log in again.'
-            : error.status === 403
-              ? 'Permission denied (403): You are not authorized.'
+          error.status === 401 ? 'Unauthorized (401): Please log in again.'
+            : error.status === 403 ? 'Permission denied (403): You are not authorized.'
               : `Failed to load reminders (Server Error ${error.status}).`;
         this.loading = false;
         this.cdr.detectChanges();
       }
     });
   }
+
 
   /**
    * Get the status of a reminder day
@@ -91,15 +89,15 @@ export class TodayRemindersComponent implements OnInit {
     if (day.taken) {
       return this.STATUS.TAKEN;
     }
-    
+
     if (dayDate < today) {
       return this.STATUS.MISSED;
     }
-    
+
     if (dayDate.getTime() === today.getTime()) {
       return this.STATUS.PENDING;
     }
-    
+
     return this.STATUS.UPCOMING;
   }
 
@@ -140,8 +138,8 @@ export class TodayRemindersComponent implements OnInit {
     const d = new Date(date);
     const today = new Date();
     return d.getDate() === today.getDate() &&
-           d.getMonth() === today.getMonth() &&
-           d.getFullYear() === today.getFullYear();
+      d.getMonth() === today.getMonth() &&
+      d.getFullYear() === today.getFullYear();
   }
 
   /**
@@ -150,7 +148,7 @@ export class TodayRemindersComponent implements OnInit {
   getRemainingDays(medication: any): number {
     const lastDay = medication.days[medication.days.length - 1];
     if (!lastDay) return 0;
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const endDate = new Date(lastDay.date);
@@ -183,66 +181,69 @@ export class TodayRemindersComponent implements OnInit {
    */
   private getAllDays(reminder: any): any[] {
     const startDate = new Date(reminder.medication.startDate);
-    const days = [];
+    const days: any[] = [];
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
-    
+    today.setHours(0, 0, 0, 0);
+
     for (let i = 0; i < reminder.medication.durationDays; i++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
-      currentDate.setHours(0, 0, 0, 0); // Reset time part for accurate date comparison
-      
+      currentDate.setHours(0, 0, 0, 0);
+
+      const isToday = currentDate.getTime() === today.getTime();
+
       const day = {
         dayNumber: i + 1,
         date: currentDate,
         taken: false,
         missed: false,
-        isToday: currentDate.getTime() === today.getTime()
+        isToday
       };
 
-      // Check if this day has a record
-      const record = reminder.medication.days?.find((d: any) => 
+      // 🔹 Check backend records first
+      const record = reminder.medication.days?.find((d: any) =>
         this.isSameDay(new Date(d.date), currentDate)
       );
 
-      // If the medication was taken, mark it as taken
       if (record && record.taken) {
         day.taken = true;
       } else if (!day.taken && currentDate < today) {
-        // Only mark as missed if it's a past date and wasn't taken
         day.missed = true;
+      }
+
+      // 🔹 EXTRA FIX: if reminder.taken is true and it's today — mark "Taken Today"
+      if (isToday && reminder.taken) {
+        day.taken = true;
+        day.missed = false;
       }
 
       days.push(day);
     }
-    
+
     return days;
   }
+
 
   /**
    * Check if two dates are the same day
    */
   private isSameDay(date1: Date, date2: Date): boolean {
     return date1.getFullYear() === date2.getFullYear() &&
-           date1.getMonth() === date2.getMonth() &&
-           date1.getDate() === date2.getDate();
+      date1.getMonth() === date2.getMonth() &&
+      date1.getDate() === date2.getDate();
   }
 
   /**
    * Get appropriate status text for display
    */
   getStatusText(day: any): string {
+    if (day.taken && day.isToday) return 'Taken Today';
     if (day.taken) return 'Taken';
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dayDate = new Date(day.date);
-    dayDate.setHours(0, 0, 0, 0);
-
-    if (dayDate < today && !day.taken) return 'Missed';
-    if (day.isToday) return 'Due Today';
+    if (day.missed && !day.taken) return 'Missed';
+    if (day.isToday && !day.taken) return 'Due Today';
     return 'Upcoming';
   }
+
 
   /**
    * Check if medication course is completed
@@ -279,18 +280,63 @@ export class TodayRemindersComponent implements OnInit {
    */
   markTaken(medicationId: number): void {
     if (!this.authHeaders) return;
-    
+
+    // Save current scroll position before DOM re-render
+    const scrollPosition = window.scrollY;
+
+    // ✅ Find the reminder
+    const reminder = this.reminders.find(r => r.medication.id === medicationId);
+    if (reminder) reminder.taken = true;
+
+    // ✅ Update grouped data
+    const grouped = this.groupedReminders.find((g: any) => g.medicationId === medicationId);
+    if (grouped) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayDay = grouped.days.find((d: any) => {
+        const dDate = new Date(d.date);
+        dDate.setHours(0, 0, 0, 0);
+        return dDate.getTime() === today.getTime();
+      });
+      if (todayDay) {
+        todayDay.taken = true;
+        todayDay.isToday = true;
+        todayDay.missed = false;
+      }
+    }
+
+    this.cdr.detectChanges();
+
+    // ✅ Call backend
     this.reminderService.markTaken(medicationId, this.authHeaders).subscribe({
       next: () => {
         console.log(`✅ Marked ${medicationId} as taken`);
-        this.loadReminders(); // refresh to stay in sync
+
+        // 🔔 Notify dashboard
+        this.reminderService.notifyReminderUpdate();
+
+        // 🧭 Reload data but restore scroll position
+        this.loadReminders();
+        setTimeout(() => {
+          window.scrollTo({ top: scrollPosition, behavior: 'instant' });
+        }, 200);
       },
       error: (err: HttpErrorResponse) => {
         console.error('❌ Failed to mark as taken:', err);
         alert('Could not update reminder status. Please try again.');
+
+        if (reminder) reminder.taken = false;
+        if (grouped) {
+          const todayDay = grouped.days.find((d: any) => d.isToday);
+          if (todayDay) todayDay.taken = false;
+        }
+        this.cdr.detectChanges();
       }
     });
   }
+
+
+
 
   /**
    * Calculate progress percentage for a reminder
@@ -309,7 +355,7 @@ export class TodayRemindersComponent implements OnInit {
   getDaysRemaining(reminder: any): number {
     const endDate = new Date(reminder.medication.startDate);
     endDate.setDate(endDate.getDate() + reminder.medication.durationDays - 1);
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     endDate.setHours(0, 0, 0, 0);

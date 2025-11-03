@@ -23,8 +23,8 @@
 
     <!-- Reminders List -->
     <div *ngIf="!loading && reminders.length > 0" class="reminders-list">
-        <div *ngFor="let reminder of reminders" class="reminder-card" 
-             [ngClass]="{'taken': reminder.taken, 'missed': isMissed(reminder)}">
+        <div *ngFor="let reminder of reminders" class="reminder-card"
+            [ngClass]="{'taken': reminder.taken, 'missed': isMissed(reminder)}">
             <div class="reminder-content">
                 <div class="medication-info">
                     <h3>💊 {{ reminder.medication.medicationName }}</h3>
@@ -47,9 +47,8 @@
                         <span *ngIf="!reminder.taken && isMissed(reminder)">❌ Missed</span>
                     </div>
 
-                    <button *ngIf="!reminder.taken && !isMissed(reminder)"
-                            (click)="markTaken(reminder.medication.id)"
-                            class="take-button">
+                    <button type="button" *ngIf="!reminder.taken && !isMissed(reminder)"
+                        (click)="markTaken(reminder.medication.id)" class="take-button">
                         Mark as Taken
                     </button>
                 </div>
@@ -57,8 +56,7 @@
 
             <div class="reminder-progress">
                 <div class="progress-bar">
-                    <div class="progress-filled" 
-                         [style.width]="getProgressPercentage(reminder) + '%'">
+                    <div class="progress-filled" [style.width]="getProgressPercentage(reminder) + '%'">
                     </div>
                 </div>
                 <span class="progress-text">
@@ -90,11 +88,12 @@
                                 <span class="day-date">{{ formatDate(day.date) }}</span>
                             </div>
                             <div class="day-status" [ngClass]="{
+                                'status-taken': day.taken && day.isToday,
                                 'status-missed': day.missed && !day.taken,
                                 'status-pending': day.isToday && !day.taken,
                                 'status-future': !day.isToday && !day.taken && !day.missed
                             }">
-                                {{ getStatusText(day) }} 
+                                {{ getStatusText(day) }}
                             </div>
                         </div>
                     </div>
@@ -104,14 +103,14 @@
                 <div class="history-section completed-section" *ngIf="getCompletedDays(reminder).length > 0">
                     <div class="section-header">
                         <h4 class="section-title">
-                            <span class="title-icon">✅</span> 
+                            <span class="title-icon">✅</span>
                             Completed Days
                         </h4>
                     </div>
                     <div class="days-grid">
                         <div *ngFor="let day of getCompletedDays(reminder)" class="day-item taken-item">
                             <div class="day-header">
-                                <span class="day-number">Day {{ day.dayNumber }}</span>
+                                <span class="day-number">Day {{ day.dayNumber }} - </span>
                                 <span class="day-date">{{ formatDate(day.date) }}</span>
                             </div>
                             <div class="day-status status-taken">
@@ -120,7 +119,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
