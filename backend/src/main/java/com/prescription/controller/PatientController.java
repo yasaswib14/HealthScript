@@ -8,6 +8,8 @@ import com.prescription.repository.MessageRepository;
 import com.prescription.repository.UserRepository;
 import com.prescription.repository.PrescriptionRepository;
 import com.prescription.security.CustomUserDetails;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/patient")
 @Tag(name = "Patient APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class PatientController {
 
     private final MessageRepository messageRepository;

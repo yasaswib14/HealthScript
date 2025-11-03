@@ -1,6 +1,5 @@
 package com.prescription.config;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
@@ -12,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
@@ -20,12 +18,11 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI myCustomConfig(){
         return new OpenAPI()
-                .info(
-                new Info().title("HealthScript APIs")
-                        .description("By Group3")
-                )
-                .servers(Arrays.asList(new Server().url("http://localhost:8080").description("local"),
-                        new Server().url("http://localhost:8082").description("live")))
+                .info(new Info().title("HealthScript APIs").description("By Group3"))
+                .servers(Arrays.asList(
+                        new Server().url("http://localhost:8081").description("local"),
+                        new Server().url("http://localhost:8082").description("live")
+                ))
                 .tags(Arrays.asList(
                         new Tag().name("Auth APIs"),
                         new Tag().name("Doctor APIs"),
@@ -34,15 +31,15 @@ public class SwaggerConfig {
                         new Tag().name("Patient APIs"),
                         new Tag().name("Prescription APIs"),
                         new Tag().name("User APIs")
+                ))
+                // require bearerAuth globally
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .components(new Components().addSecuritySchemes(
+                        "bearerAuth",
+                        new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")
                 ));
-                // .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
-                // .components(new Components().addSecuritySchemes(
-                //         "bearerAuth", new SecurityScheme()
-                //                 .type(SecurityScheme.Type.HTTP)
-                //                 .scheme("bearer")
-                //                 .bearerFormat("JWT")
-                //                 .in(SecurityScheme.In.HEADER)
-                //                 .name("Authorization")
-                // ));
     }
 }

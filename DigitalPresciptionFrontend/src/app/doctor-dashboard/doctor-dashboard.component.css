@@ -158,11 +158,105 @@ h2 {
     border: 1px solid rgba(0, 119, 255, 0.2);
     backdrop-filter: blur(20px);
     transition: all 0.3s ease-in-out;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: #fff; /* default */
+    transition: background 200ms ease, box-shadow 200ms ease;
 }
 
-.message-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 119, 255, 0.25);
+/* Fix overflow: ensure inputs/cards don't peek out of the container */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Ensure dashboard and forms respect their parent width */
+.doctor-dashboard,
+.prescription-form,
+.message-card,
+.medication-card {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Allow grid/flex children to shrink instead of overflowing */
+.medication-grid,
+.medications-list {
+  min-width: 0;
+}
+
+.medication-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* responsive columns */
+  gap: 1rem;
+}
+
+/* Inputs must not exceed their container and can shrink */
+.input-field,
+.input-group .input-field,
+textarea.input-field {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Input group: allow wrapping on small screens and prevent suffix from pushing out */
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.input-group .input-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.input-suffix {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Message card safety */
+.message-card {
+  overflow: hidden;
+  padding-right: 1rem;
+}
+
+/* Softer, valid medium severity background */
+.message-card.severity-medium {
+  background: linear-gradient(90deg, #fff9e6 0%, #fff4bf 100%);
+  border: 1px solid rgba(255, 183, 77, 0.2);
+  box-shadow: 0 2px 6px rgba(255, 183, 77, 0.06);
+}
+
+/* medium severity -> orange-yellow background */
+.message-card.severity-medium {
+  background:  #f0da33 100%; /* soft orange-yellow */
+  border: 1px solid rgba(255, 183, 77, 0.25);
+  box-shadow: 0 2px 6px rgba(255, 183, 77, 0.08);
+}
+
+/* optional: keep high/low styles consistent */
+.message-card.severity-high {
+  background: #fff1f0;
+  border: 1px solid rgba(255, 99, 71, 0.15);
+}
+.message-card.severity-low {
+  background: #f6ffed;
+  border: 1px solid rgba(52, 211, 153, 0.12);
+}
+
+/* severity tag tweaks (optional) */
+.severity-tag.medium {
+  background: #e4c37a;
+  color: #6a4b00;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
 }
 
 /* ===== Message Info ===== */
@@ -505,7 +599,7 @@ h2 {
 .message-card.severity-high {
     border: 2px solid var(--error);
     /* Red border */
-    background: rgba(255, 240, 240, 0.95);
+    background: rgba(234, 104, 104, 0.95);
     /* Very light red background */
     box-shadow: 0 6px 18px rgba(239, 68, 68, 0.25);
 }
@@ -582,4 +676,18 @@ p {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* small screen tweaks */
+@media (max-width: 720px) {
+  .doctor-dashboard {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .medication-grid {
+    grid-template-columns: 1fr;
+  }
+  .input-group {
+    flex-wrap: wrap;
+  }
 }

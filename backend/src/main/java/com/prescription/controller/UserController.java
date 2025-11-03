@@ -4,6 +4,8 @@ import com.prescription.model.User;
 import com.prescription.service.UserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @Tag(name = "User APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
     private final UserService service;
 
