@@ -8,6 +8,8 @@ import com.prescription.repository.MessageRepository;
 import com.prescription.repository.PrescriptionRepository;
 import com.prescription.repository.UserRepository;
 import com.prescription.repository.MedicationRepository;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/doctor")
 @Tag(name = "Doctor APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class DoctorController {
 
     private final MessageRepository messageRepository;

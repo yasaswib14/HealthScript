@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.prescription.repository.MedicationRepository;
 import com.prescription.repository.MedicationReminderRepository;
 import com.prescription.repository.UserRepository;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/patient/reminder")
 @Tag(name = "Medication Reminder APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class MedicationReminderController {
 
     @Autowired

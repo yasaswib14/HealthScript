@@ -4,6 +4,8 @@ import com.prescription.model.Medication;
 import com.prescription.service.MedicationService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/medications")
 @Tag(name = "Medication APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class MedicationController {
     private final MedicationService service;
 
