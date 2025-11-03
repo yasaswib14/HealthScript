@@ -4,7 +4,7 @@
             <h2>👋 Welcome Back!</h2>
             <p class="date-display">{{ currentDate | date:'EEEE, MMMM d, y' }}</p>
         </div>
-        
+
         <!-- Moved logout button to the right -->
         <div class="header-actions">
             <button *ngIf="currentView === 'menu'" class="logout-btn" (click)="logout()">
@@ -83,8 +83,8 @@
                         <i class="fas fa-user"></i>
                         Full Name
                     </label>
-                    <input id="name" name="name" type="text" ngModel required 
-                           placeholder="Enter your full name" class="form-control" />
+                    <input id="name" name="name" type="text" ngModel required placeholder="Enter your full name"
+                        class="form-control" />
                 </div>
 
                 <div class="form-group">
@@ -92,9 +92,8 @@
                         <i class="fas fa-birthday-cake"></i>
                         Age
                     </label>
-                    <input id="age" name="age" type="number" ngModel required 
-                           placeholder="Enter your age" class="form-control"
-                           #ageInput="ngModel" (input)="onAgeChange(ageInput.value, patientForm)" />
+                    <input id="age" name="age" type="number" ngModel required placeholder="Enter your age"
+                        class="form-control" #ageInput="ngModel" (input)="onAgeChange(ageInput.value, patientForm)" />
                 </div>
             </div>
 
@@ -140,8 +139,7 @@
                     <i class="fas fa-comment-medical"></i>
                     Symptoms Description
                 </label>
-                <textarea id="description" name="description" ngModel rows="4" required
-                    class="form-control" 
+                <textarea id="description" name="description" ngModel rows="4" required class="form-control"
                     placeholder="Please describe your symptoms, when they started, and any relevant medical history..."></textarea>
             </div>
 
@@ -210,19 +208,18 @@
                         </h5>
                         <p class="diagnosis-text">{{ p.diagnosis }}</p>
                     </div>
-                    
+
                     <!-- Medications List -->
                     <div class="medications-list">
                         <h5>
                             <i class="fas fa-pills"></i>
                             Prescribed Medications
                         </h5>
-                        <div *ngFor="let med of p.medications" class="medication-item">
+                        <div *ngFor="let med of getSortedMedications(p.medications)" class="medication-item">
                             <div class="medication-header">
                                 <h6>{{ med.medicationName }}</h6>
-                                <span class="medication-status" 
-                                      [class.active]="isActiveMedication(med)"
-                                      [class.completed]="isMedicationCompleted(med)">
+                                <span class="medication-status" [class.active]="isActiveMedication(med)"
+                                    [class.completed]="isMedicationCompleted(med)">
                                     <i [class]="getMedicationStatusIcon(med)"></i>
                                     {{ getMedicationStatus(med) }}
                                 </span>
@@ -267,7 +264,7 @@
                 Medication Schedule
             </h3>
         </div>
-        
+
         <div class="reminders-wrapper">
             <app-today-reminders></app-today-reminders>
         </div>
