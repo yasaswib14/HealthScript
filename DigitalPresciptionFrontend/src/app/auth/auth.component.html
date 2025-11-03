@@ -1,0 +1,211 @@
+<!-- 👇 Show Login/Register only when not in /dashboard -->
+<ng-container *ngIf="!router.url.includes('/dashboard')">
+
+  <!-- wrap main auth content so we can blur it -->
+  <div class="auth-root" [class.blurred]="isRedirecting">
+    <div class="split-card">
+      <!-- Left Section -->
+      <div class="left-section">
+        <img src="assets/Logo.png" alt="Medical Logo" class="medical-logo" />
+        <div class="welcome-title">Welcome To<br>HealthScript</div>
+        <div class="welcome-subtitle">
+          <br>{{ showRegister ? 'Creating your account...' : 'Login for free and manage your prescriptions.' }}
+        </div>
+        <button class="signup-btn" (click)="showRegister = true">
+          {{ showRegister ? 'Fast. Safe. Digital.' : 'Sign Up' }}
+        </button>
+      </div>
+
+      <!-- Right Section -->
+      <div class="right-section">
+        <div class="form-title">{{ showRegister ? 'Register' : 'Login' }}</div>
+
+        <!-- Login Form -->
+        <form *ngIf="!showRegister" #loginForm="ngForm" (ngSubmit)="onLogin(loginForm)">
+          <div class="input-group">
+            <label for="login-username">Username</label>
+            <div class="input-wrapper">
+              <input id="login-username" 
+                     name="username" 
+                     type="text" 
+                     [(ngModel)]="loginData.username"
+                     #loginUsername="ngModel"
+                     required 
+                     autocomplete="username"
+                     placeholder="Enter your username"
+                     [class.invalid]="loginUsername.invalid && (loginUsername.dirty || loginUsername.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="loginUsername.invalid && (loginUsername.dirty || loginUsername.touched)">
+              <span *ngIf="loginUsername.errors?.['required']">Username is required</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="login-password">Password</label>
+            <div class="input-wrapper">
+              <input id="login-password" 
+                     name="password" 
+                     type="password" 
+                     [(ngModel)]="loginData.password"
+                     #loginPassword="ngModel"
+                     required 
+                     autocomplete="current-password"
+                     placeholder="Enter your password"
+                     [class.invalid]="loginPassword.invalid && (loginPassword.dirty || loginPassword.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="loginPassword.invalid && (loginPassword.dirty || loginPassword.touched)">
+              <span *ngIf="loginPassword.errors?.['required']">Password is required</span>
+            </div>
+          </div>
+
+          <button type="submit" class="login-btn" [disabled]="loginForm.invalid || !validateLoginForm()">Sign In</button>
+        </form>
+
+        <!-- Register Form -->
+        <form *ngIf="showRegister" #registerForm="ngForm" (ngSubmit)="onRegister(registerForm)">
+          <div class="input-group">
+            <label for="register-username">Username</label>
+            <div class="input-wrapper">
+              <input id="register-username" 
+                     name="username" 
+                     type="text" 
+                     [(ngModel)]="registerData.username"
+                     #regUsername="ngModel"
+                     required 
+                     minlength="3"
+                     placeholder="Choose a username"
+                     [class.invalid]="regUsername.invalid && (regUsername.dirty || regUsername.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regUsername.invalid && (regUsername.dirty || regUsername.touched)">
+              <span *ngIf="regUsername.errors?.['required']">Username is required</span>
+              <span *ngIf="regUsername.errors?.['minlength']">Username must be at least 3 characters</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="register-email">Email</label>
+            <div class="input-wrapper">
+              <input id="register-email" 
+                     name="email" 
+                     type="email" 
+                     [(ngModel)]="registerData.email"
+                     #regEmail="ngModel"
+                     required 
+                     email
+                     pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                     placeholder="Enter your email"
+                     [class.invalid]="regEmail.invalid && (regEmail.dirty || regEmail.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regEmail.invalid && (regEmail.dirty || regEmail.touched)">
+              <span *ngIf="regEmail.errors?.['required']">Email is required</span>
+              <span *ngIf="regEmail.errors?.['email'] || regEmail.errors?.['pattern']">Please enter a valid email address</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="register-role">Role</label>
+            <div class="input-wrapper">
+              <select id="register-role" 
+                      name="role" 
+                      [(ngModel)]="registerData.role"
+                      #regRole="ngModel"
+                      required
+                      [class.invalid]="regRole.invalid && (regRole.dirty || regRole.touched)"
+                      (change)="selectedRole = regRole.value">
+                <option value="" disabled selected>Select your role</option>
+                <option value="ROLE_DOCTOR">Doctor</option>
+                <option value="ROLE_PATIENT">Patient</option>
+              </select>
+            </div>
+            <div class="validation-message" *ngIf="regRole.invalid && (regRole.dirty || regRole.touched)">
+              <span *ngIf="regRole.errors?.['required']">Please select a role</span>
+            </div>
+          </div>
+
+          <!-- 👇 Show Specialization if Doctor is selected -->
+          <div class="input-group" *ngIf="selectedRole === 'ROLE_DOCTOR'">
+            <label for="register-specialization">Specialization</label>
+            <div class="input-wrapper">
+              <select id="register-specialization" 
+                      name="specialization" 
+                      [(ngModel)]="registerData.specialization"
+                      #regSpecialization="ngModel"
+                      required
+                      [class.invalid]="regSpecialization.invalid && (regSpecialization.dirty || regSpecialization.touched)">
+                <option value="" disabled selected>Select your specialization</option>
+                <option value="Cardiologist">Cardiologist</option>
+                <option value="Dermatologist">Dermatologist</option>
+                <option value="Gastroenterologist">Gastroenterologist</option>
+                <option value="Neurology">Neurology</option>
+                <option value="Pediatrician">Pediatrician</option>
+              </select>
+            </div>
+            <div class="validation-message" *ngIf="regSpecialization.invalid && (regSpecialization.dirty || regSpecialization.touched)">
+              <span *ngIf="regSpecialization.errors?.['required']">Please select your specialization</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="register-password">Password</label>
+            <div class="input-wrapper">
+              <input id="register-password" 
+                     name="password" 
+                     type="password" 
+                     [(ngModel)]="registerData.password"
+                     #regPassword="ngModel"
+                     required 
+                     minlength="6"
+                     pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$"
+                     placeholder="Create a password" 
+                     [class.invalid]="regPassword.invalid && (regPassword.dirty || regPassword.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regPassword.invalid && (regPassword.dirty || regPassword.touched)">
+              <span *ngIf="regPassword.errors?.['required']">Password is required</span>
+              <span *ngIf="regPassword.errors?.['minlength']">Password must be at least 6 characters</span>
+              <span *ngIf="regPassword.errors?.['pattern']">Password must contain both letters and numbers</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="register-confirm-password">Confirm Password</label>
+            <div class="input-wrapper">
+              <input id="register-confirm-password" 
+                     name="confirmPassword" 
+                     type="password" 
+                     [(ngModel)]="registerData.confirmPassword"
+                     #regConfirmPassword="ngModel"
+                     required 
+                     [pattern]="registerData.password"
+                     placeholder="Confirm your password" 
+                     [class.invalid]="regConfirmPassword.invalid && (regConfirmPassword.dirty || regConfirmPassword.touched)" />
+            </div>
+            <div class="validation-message" *ngIf="regConfirmPassword.invalid && (regConfirmPassword.dirty || regConfirmPassword.touched)">
+              <span *ngIf="regConfirmPassword.errors?.['required']">Please confirm your password</span>
+              <span *ngIf="regConfirmPassword.errors?.['pattern']">Passwords do not match</span>
+            </div>
+          </div>
+
+          <button type="submit" class="login-btn" [disabled]="registerForm.invalid || !validateRegisterForm()">
+            Create Account
+          </button>
+
+          <div class="form-links" style="justify-content: flex-end;">
+            <a href="#" class="register-link" (click)="showRegister = false">
+              Already have an account? Login
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Redirect overlay shown when isRedirecting = true -->
+  <div *ngIf="isRedirecting" class="redirect-overlay" aria-live="polite" role="status">
+    <div class="overlay-content">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="redirect-text">Redirecting to login...</div>
+    </div>
+  </div>
+</ng-container>
+
+<!-- 👇 VERY IMPORTANT: This is where Angular will load the dashboard -->

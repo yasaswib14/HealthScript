@@ -1,0 +1,693 @@
+/* ===============================
+   ⚕️ DOCTOR DASHBOARD – GLASS LIGHT THEME
+   =============================== */
+
+/* Form validation styles */
+.is-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25) !important;
+    background-color: #fff !important;
+}
+
+.error-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.form-group label::after {
+    content: " *";
+    color: #ef4444;
+}
+:root {
+    --primary: #0077ff;
+    --secondary: #00c2ff;
+    --success: #16a34a;
+    --error: #ef4444;
+    --text-dark: #1e293b;
+    --text-light: #f8fafc;
+    --muted: #64748b;
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.08);
+    --glow-blue: 0 0 25px rgba(0, 153, 255, 0.3);
+}
+
+/* ===== Dashboard Header Layout (top section) ===== */
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* center the title area */
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+/* Keep the title visually centered */
+.header {
+    text-align: center;
+    font-size: 2.4rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    animation: slideDown 0.8s ease;
+}
+
+/* ===== Container ===== */
+.doctor-dashboard {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 40px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #e3f2fd, #f9fbff);
+    box-shadow: var(--shadow-soft);
+    font-family: "Poppins", sans-serif;
+    animation: fadeIn 0.9s ease-out;
+}
+
+/* Form Validation Styles */
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.1) !important;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: block;
+    font-weight: 500;
+}
+
+.text-danger {
+    color: #dc3545;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Required field indicator */
+label:after {
+    content: " *";
+    color: #dc3545;
+}
+
+/* ===== Header ===== */
+.header {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    /* -webkit-text-fill-color: transparent; */
+    animation: slideDown 0.8s ease;
+}
+
+.subtext {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+/* ===== Status Box ===== */
+.status-box {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 24px;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+    box-shadow: var(--glow-blue);
+    margin-bottom: 30px;
+    border: 1px solid rgba(0, 119, 255, 0.2);
+}
+
+/* ===== Messages Header ===== */
+h2 {
+    color: var(--text-dark);
+    font-weight: 700;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* ===== Message Card ===== */
+.message-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    margin: 24px 0;
+    box-shadow: 0 6px 18px rgba(0, 119, 255, 0.12);
+    border: 1px solid rgba(0, 119, 255, 0.2);
+    backdrop-filter: blur(20px);
+    transition: all 0.3s ease-in-out;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: #fff; /* default */
+    transition: background 200ms ease, box-shadow 200ms ease;
+}
+
+/* Fix overflow: ensure inputs/cards don't peek out of the container */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Ensure dashboard and forms respect their parent width */
+.doctor-dashboard,
+.prescription-form,
+.message-card,
+.medication-card {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Allow grid/flex children to shrink instead of overflowing */
+.medication-grid,
+.medications-list {
+  min-width: 0;
+}
+
+.medication-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* responsive columns */
+  gap: 1rem;
+}
+
+/* Inputs must not exceed their container and can shrink */
+.input-field,
+.input-group .input-field,
+textarea.input-field {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Input group: allow wrapping on small screens and prevent suffix from pushing out */
+.input-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.input-group .input-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.input-suffix {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+/* Message card safety */
+.message-card {
+  overflow: hidden;
+  padding-right: 1rem;
+}
+
+/* Softer, valid medium severity background */
+.message-card.severity-medium {
+  background: linear-gradient(90deg, #fff9e6 0%, #fff4bf 100%);
+  border: 1px solid rgba(255, 183, 77, 0.2);
+  box-shadow: 0 2px 6px rgba(255, 183, 77, 0.06);
+}
+
+/* medium severity -> orange-yellow background */
+.message-card.severity-medium {
+  background:  #f0da33 100%; /* soft orange-yellow */
+  border: 1px solid rgba(255, 183, 77, 0.25);
+  box-shadow: 0 2px 6px rgba(255, 183, 77, 0.08);
+}
+
+/* optional: keep high/low styles consistent */
+.message-card.severity-high {
+  background: #fff1f0;
+  border: 1px solid rgba(255, 99, 71, 0.15);
+}
+.message-card.severity-low {
+  background: #f6ffed;
+  border: 1px solid rgba(52, 211, 153, 0.12);
+}
+
+/* severity tag tweaks (optional) */
+.severity-tag.medium {
+  background: #e4c37a;
+  color: #6a4b00;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+/* ===== Message Info ===== */
+.message-header {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.message-body {
+    background: rgba(240, 247, 255, 0.8);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 10px;
+    color: var(--text-dark);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.timestamp {
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-align: right;
+    margin-top: 5px;
+}
+
+/* ===== Form Styling ===== */
+.prescription-form {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    box-shadow: var(--shadow-soft);
+}
+
+/* Multiple Medications */
+.medications-list {
+    margin: 1.5rem 0;
+}
+
+.medications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+}
+
+.medication-card {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.medication-card:hover {
+    border-color: #94a3b8;
+}
+
+.medication-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.medication-header h4 {
+    color: #1e293b;
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.remove-btn {
+    background-color: #fecaca;
+    border: 1px solid #ef4444;
+    color: #dc2626;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+    background-color: #ef4444;
+    color: white;
+}
+
+.remove-btn i {
+    font-size: 1rem;
+}
+
+.medication-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+}
+
+.input-field {
+    width: 100%;
+    padding: 0.625rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    color: #1e293b;
+    background-color: white;
+    transition: all 0.2s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-field::placeholder {
+    color: #94a3b8;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+.input-group .input-field {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-suffix {
+    padding: 0.625rem 1rem;
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-left: none;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.add-med-btn, .remove-med-btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin: 0.5rem 0;
+}
+
+.add-med-btn {
+    background: var(--success);
+    color: white;
+    border: none;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.remove-med-btn {
+    background: var(--error);
+    color: white;
+    border: none;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}
+
+.add-med-btn:hover {
+    background: #15803d;
+}
+
+.remove-med-btn:hover {
+    background: #dc2626;
+}
+
+.input-field {
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    transition: all 0.25s ease;
+}
+
+.input-field::placeholder {
+    color: #9ca3af;
+}
+
+.input-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px rgba(0, 119, 255, 0.3);
+    transform: scale(1.02);
+    outline: none;
+}
+
+/* ===== Button Styling ===== */
+.respond-btn {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border: none;
+    color: rgb(60, 121, 220);
+    font-weight: 600;
+    padding: 14px;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    overflow: hidden;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.respond-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+}
+
+.respond-btn:hover::before {
+    left: 130%;
+}
+
+.respond-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px rgba(0, 119, 255, 0.4);
+    background-color: #16a34a;
+    color: #f9fbff;
+}
+
+/* Button Styles */
+.btn-action {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-secondary {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-secondary:hover {
+    background-color: #e2e8f0;
+}
+
+.prescription-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Logout Button */
+.logout-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+    background-color: #dc2626;
+}
+
+.logout-btn::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: skewX(-20deg);
+    transition: left 0.6s ease;
+}
+
+.logout-btn:hover::before {
+    left: 130%;
+}
+
+.logout-btn:hover {
+    background: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.message-card.severity-high {
+    border: 2px solid var(--error);
+    /* Red border */
+    background: rgba(234, 104, 104, 0.95);
+    /* Very light red background */
+    box-shadow: 0 6px 18px rgba(239, 68, 68, 0.25);
+}
+
+.message-card.severity-high:hover {
+    transform: translateY(-7px);
+    /* More pronounced hover effect */
+    box-shadow: 0 12px 30px rgba(239, 68, 68, 0.4);
+}
+
+/* Style for the visual severity tag */
+.severity-tag {
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 8px;
+    margin-left: auto;
+    /* Push to the right */
+}
+
+.severity-tag.high {
+    background-color: var(--error);
+    color: var(--text-light);
+}
+
+.severity-tag.medium {
+    background-color: #f59e0b;
+    /* Amber */
+    color: var(--text-dark);
+}
+
+.severity-tag.low {
+    background-color: #d1d5db;
+    /* Light gray */
+    color: var(--text-dark);
+}
+
+.message-header {
+    font-weight: 600;
+    color: var(--primary);
+    font-size: 1rem;
+    display: flex;
+    /* Allow severity tag placement */
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ===== Loader ===== */
+p {
+    text-align: center;
+    color: var(--muted);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* small screen tweaks */
+@media (max-width: 720px) {
+  .doctor-dashboard {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .medication-grid {
+    grid-template-columns: 1fr;
+  }
+  .input-group {
+    flex-wrap: wrap;
+  }
+}

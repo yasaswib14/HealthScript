@@ -1,0 +1,194 @@
+<div class="doctor-dashboard">
+            <!-- Custom Notification/Toast -->
+            <div *ngIf="messageText" class="notification" [ngClass]="{'success-toast': showSuccess, 'error-toast': showError}">
+                {{ messageText }}
+            </div>
+
+            <h1 class="header">👨‍⚕️ Doctor Dashboard</h1>
+<!-- <p class="subtext">Welcome, Doctor</p> -->
+
+<div class="status-box">
+    <strong>Status:</strong> {{ apiMessage }}
+</div>
+
+<hr>
+
+<h2>📩 Patient Messages</h2>
+
+<!-- ✅ Show loader while fetching -->
+<div *ngIf="isLoading">
+    <p class="loader-text">Loading patient messages...</p>
+    <div class="loader"></div>
+</div>
+
+    <!-- ✅ Messages -->
+    <div *ngIf="!isLoading && messages && messages.length > 0">
+        <div *ngFor="let msg of messages" class="message-card"
+         [ngClass]="{
+           'severity-high': msg.severity === 'HIGH',
+           'severity-medium': msg.severity === 'MEDIUM',
+           'severity-low': msg.severity === 'LOW'
+         }">
+            <div class="message-header">
+                <strong>From:</strong> {{ msg.sender?.username }}
+                <span class="severity-tag" [ngClass]="{
+              high: msg.severity === 'HIGH',
+              medium: msg.severity === 'MEDIUM',
+              low: msg.severity === 'LOW'
+            }">
+                    {{ msg.severity || 'LOW' }}
+                </span>
+            </div>
+
+        <div class="message-body">
+            <p><strong>Message:</strong> {{ msg.content }}</p>
+            <p><strong>Time:</strong> {{ msg.timestamp | date:'medium' }}</p>
+        </div>
+
+        <!-- Respond form with multiple medications -->
+        <form #prescriptionForm="ngForm" (ngSubmit)="respondToPatient(msg.id, prescriptionForm)"
+            class="prescription-form">
+            <div class="form-group full-width">
+                <label for="diagnosis-{{msg.id}}">Diagnosis</label>
+                <input type="text" 
+                       [id]="'diagnosis-' + msg.id"
+                       [name]="'diagnosis-' + msg.id" 
+                       [(ngModel)]="getPrescriptionData(msg.id).diagnosis" 
+                       #diagnosisInput="ngModel"
+                       required 
+                       placeholder="Enter patient diagnosis"
+                       [class.is-invalid]="(formSubmitted[msg.id] && !getPrescriptionData(msg.id).diagnosis) || 
+                                         (diagnosisInput.invalid && diagnosisInput.touched)"
+                       class="input-field" />
+                <div class="error-message" 
+                     *ngIf="formSubmitted[msg.id] && !getPrescriptionData(msg.id).diagnosis">
+                    <span class="text-danger">
+                        ⚠️ Please enter a diagnosis for the patient
+                    </span>
+                </div>
+            </div>
+
+            <!-- Medications List -->
+            <div class="medications-list">
+                <div *ngFor="let med of getPrescriptionData(msg.id).medications; let i = index" class="medication-card">
+                    <div class="medication-header">
+                        <h4>Medication {{i + 1}}</h4>
+                        <button type="button" 
+                                *ngIf="getPrescriptionData(msg.id).medications.length > 1" 
+                                (click)="removeMedication(msg.id, i)" 
+                                class="remove-btn">
+                            <i class="fas fa-trash-alt"></i>
+                            Remove Medication
+                        </button>
+                    </div>
+
+                    <div class="medication-grid">
+                        <!-- Medication Name -->
+                        <div class="form-group full-width">
+                            <label [for]="'medicationName-' + msg.id + '-' + i">Medication Name</label>
+                            <input type="text" 
+                                   [id]="'medicationName-' + msg.id + '-' + i" 
+                                   [(ngModel)]="med.medicationName" 
+                                   [name]="'medicationName' + msg.id + '-' + i" 
+                                   #medName="ngModel"
+                                   required 
+                                   placeholder="Enter medication name" 
+                                   [class.is-invalid]="(formSubmitted[msg.id] && !med.medicationName) || 
+                                                     (medName.invalid && medName.touched)"
+                                   class="input-field" />
+                            <div class="error-message" *ngIf="formSubmitted[msg.id] && !med.medicationName">
+                                <span class="text-danger">⚠️ Medication name is required</span>
+                            </div>
+                        </div>
+
+                        <!-- Dosage Timing -->
+                        <div class="form-group">
+                            <label [for]="'dosageTiming-' + msg.id + '-' + i">Dosage Timing</label>
+                            <select [id]="'dosageTiming-' + msg.id + '-' + i" 
+                                    [(ngModel)]="med.dosageTiming" 
+                                    [name]="'dosageTiming' + msg.id + '-' + i" 
+                                    #dosageTiming="ngModel"
+                                    class="input-field" 
+                                    [class.is-invalid]="(formSubmitted[msg.id] && !med.dosageTiming) || 
+                                                      (dosageTiming.invalid && dosageTiming.touched)"
+                                    required>
+                                <option value="">Select timing</option>
+                                <option value="Morning">Morning</option>
+                                <option value="Afternoon">Afternoon</option>
+                                <option value="Evening">Evening</option>
+                                <option value="Night">Night</option>
+                                <option value="Morning, Night">Morning & Night</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="error-message" *ngIf="formSubmitted[msg.id] && !med.dosageTiming">
+                                <span class="text-danger">⚠️ Please select dosage timing</span>
+                            </div>
+                        </div>
+
+                        <!-- Duration -->
+                        <div class="form-group">
+                            <label [for]="'durationDays-' + msg.id + '-' + i">Duration</label>
+                            <div class="input-group">
+                                <input [id]="'durationDays-' + msg.id + '-' + i" 
+                                       [(ngModel)]="med.durationDays" 
+                                       [name]="'durationDays' + msg.id + '-' + i" 
+                                       #duration="ngModel"
+                                       type="number" 
+                                       min="1" 
+                                       required
+                                       [class.is-invalid]="(formSubmitted[msg.id] && (!med.durationDays || med.durationDays < 1)) || 
+                                                         (duration.invalid && duration.touched)"
+                                       placeholder="Number of days" 
+                                       class="input-field" />
+                                <span class="input-suffix">days</span>
+                            </div>
+                            <div class="error-message" *ngIf="formSubmitted[msg.id] && (!med.durationDays || med.durationDays < 1)">
+                                <span class="text-danger">⚠️ Please enter valid duration (minimum 1 day)</span>
+                            </div>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="form-group">
+                            <label [for]="'startDate-' + msg.id + '-' + i">Start Date</label>
+                            <input [id]="'startDate-' + msg.id + '-' + i" 
+                                [(ngModel)]="med.startDate" 
+                                [name]="'startDate' + msg.id + '-' + i" 
+                                #startDate="ngModel"
+                                type="date" 
+                                [min]="getTodayDate()"
+                                required
+                                [class.is-invalid]="(formSubmitted[msg.id] && !med.startDate) || 
+                                                  (startDate.invalid && startDate.touched)"
+                                class="input-field" />
+                            <div class="error-message" *ngIf="formSubmitted[msg.id] && !med.startDate">
+                                <span class="text-danger">⚠️ Please select a start date</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prescription-buttons">
+                <button type="button" (click)="addMedication(msg.id)" class="btn-action btn-secondary">
+                    <i class="fas fa-plus"></i> Add Medication
+                </button>
+                <button type="button" (click)="validateAndSubmit(msg.id, prescriptionForm)" class="btn-action btn-primary">
+                    <i class="fas fa-paper-plane"></i> Send Prescription
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Empty State -->
+<div *ngIf="!isLoading && (!messages || messages.length === 0)" class="empty-state">
+    <p>No messages assigned to you yet 🕊️</p>
+</div>
+
+<!-- Logout Button -->
+<button class="logout-button" (click)="logout()">
+    <i class="fas fa-sign-out-alt"></i> Logout
+</button>
+
+
+</div>
