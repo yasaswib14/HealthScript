@@ -16,37 +16,29 @@ import { MedicationReminder } from '../models/reminder.model';
   styleUrls: ['./patient-dashboard.component.css']
 })
 export class PatientDashboardComponent implements OnInit {
-  // 🌐 Injected Services
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
   private reminderService = inject(MedicationReminderService);
 
-  // 🧭 View Management
   currentView: 'menu' | 'form' | 'prescriptions' | 'reminders' = 'menu';
-
-  // 💊 Prescription Data
   prescriptions: any[] = [];
   isLoading: boolean = false;
   selectedSpecialist: string = '';
   currentDate: Date = new Date();
 
-  // 🕒 Reminder State
   hasPendingReminderToday: boolean = false;
-  hasActiveReminders: boolean = false; // backward compatibility with template
+  hasActiveReminders: boolean = false;
 
-  // 🔐 Auth Header Cache
   private authHeaders: HttpHeaders | null = null;
 
-  // 🔤 Medication Status Enum
   private readonly STATUS = {
     ACTIVE: 'active',
     COMPLETED: 'completed',
     UPCOMING: 'upcoming'
   };
 
-  // ⚠️ Safe alert for both SSR and browser
   private safeAlert(message: string): void {
     if (isPlatformBrowser(this.platformId)) {
       alert(message);
@@ -55,37 +47,30 @@ export class PatientDashboardComponent implements OnInit {
     }
   }
 
-  // 🚀 OnInit Lifecycle
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const token = localStorage.getItem('jwtToken');
     if (token) {
       this.authHeaders = new HttpHeaders({ Authorization: `Bearer ${token}` });
-
-      // Load prescriptions and reminders
       this.loadPrescriptions(this.authHeaders);
       this.loadReminderSummary(this.authHeaders);
-
-      // 🔔 Auto-refresh reminder status when updated elsewhere
       this.reminderService.reminderUpdated$.subscribe(() => {
         this.loadReminderSummary(this.authHeaders!);
       });
     }
 
-    // ⏰ Auto-update time every minute
     setInterval(() => {
       this.currentDate = new Date();
       this.cdr.detectChanges();
     }, 60000);
   }
 
-  // 📆 Fetch whether there are any reminders pending today
   private loadReminderSummary(headers: HttpHeaders): void {
     this.reminderService.getTodayReminders(headers).subscribe({
       next: (list: MedicationReminder[]) => {
         this.hasPendingReminderToday = Array.isArray(list) && list.some(r => !r.taken);
-        this.hasActiveReminders = this.hasPendingReminderToday; // sync with template
+        this.hasActiveReminders = this.hasPendingReminderToday;
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -94,7 +79,6 @@ export class PatientDashboardComponent implements OnInit {
     });
   }
 
-  // 💊 Load Prescription Data
   private loadPrescriptions(headers: HttpHeaders): void {
     this.isLoading = true;
     this.http.get('http://localhost:8081/patient/prescriptions', { headers })
@@ -109,6 +93,10 @@ export class PatientDashboardComponent implements OnInit {
             },
             medications: p.medications || []
           }));
+
+          // 🩺 Sort prescriptions after mapping (Active → Upcoming → Completed)
+          this.prescriptions = this.getSortedPrescriptions(this.prescriptions);
+
           this.isLoading = false;
           this.cdr.detectChanges();
         },
@@ -120,7 +108,6 @@ export class PatientDashboardComponent implements OnInit {
       });
   }
 
-  // 👶 Auto-select Pediatrician for age under 10
   onAgeChange(age: string, form: NgForm): void {
     const ageValue = parseInt(age, 10);
     const diseaseControl = form.controls['disease'];
@@ -141,7 +128,6 @@ export class PatientDashboardComponent implements OnInit {
     }, 0);
   }
 
-  // 📝 Submit Disease Form
   onSubmit(form: NgForm): void {
     if (!form.valid) {
       this.safeAlert('⚠️ Please fill out all required fields.');
@@ -184,7 +170,6 @@ export class PatientDashboardComponent implements OnInit {
       });
   }
 
-  // 🚪 Logout Function
   logout(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('jwtToken');
@@ -229,5 +214,31 @@ export class PatientDashboardComponent implements OnInit {
     const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     const daysElapsed = Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
     return Math.min(100, Math.round((daysElapsed / totalDays) * 100));
+  }
+
+  // ✅ Sort medications inside a prescription
+  getSortedMedications(list: any[]): any[] {
+    if (!Array.isArray(list)) return [];
+    const active = list.filter(m => this.isActiveMedication(m));
+    const upcoming = list.filter(m => !this.isActiveMedication(m) && !this.isMedicationCompleted(m));
+    const completed = list.filter(m => this.isMedicationCompleted(m));
+
+    active.sort((a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime());
+    upcoming.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+    completed.sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
+
+    return [...active, ...upcoming, ...completed];
+  }
+
+  // ✅ Sort entire prescriptions: Active → Upcoming → Completed
+  private getSortedPrescriptions(list: any[]): any[] {
+    const isPrescriptionCompleted = (p: any): boolean =>
+      p.medications && p.medications.every((m: any) => this.isMedicationCompleted(m));
+
+    const active = list.filter(p => p.medications.some((m: any) => this.isActiveMedication(m)));
+    const upcoming = list.filter(p => !p.medications.some((m: any) => this.isActiveMedication(m)) && !isPrescriptionCompleted(p));
+    const completed = list.filter(p => isPrescriptionCompleted(p));
+
+    return [...active, ...upcoming, ...completed];
   }
 }
